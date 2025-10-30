@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>嘂儿的博客</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background-color: #806d9e;
+            color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300; 
+            margin-bottom: 2.5rem;
+            color: #ffffff;
+        }
+
+        nav {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link,
+        .fawtic-summary {
+            padding: 0.8rem 1.8rem;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            display: inline-block; 
+        }
+
+        .nav-link:hover,
+        .fawtic-summary:hover {
+            opacity: 0.85;
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .diary { background-color: #30161c; }
+        .record { background-color: #132c33; }
+        .fawtic-summary { background-color: #131824; }
+
+        .fawtic-details {
+            position: relative;
+            text-align: left;
+        }
+
+        .fawtic-summary {
+            list-style: none; 
+        }
+        .fawtic-summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .fawtic-content {
+            position: absolute;
+            width: 100%;
+            background-color: #131824; 
+            border-radius: 0 0 8px 8px; 
+            margin-top: 0.5rem; 
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            z-index: 10;
+            padding: 0.5rem 0;
+        }
+        
+        .fawtic-details[open] .fawtic-summary {
+            border-radius: 8px 8px 0 0;
+        }
+
+        .fawtic-content a {
+            display: block;
+            padding: 0.75rem 1.5rem;
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .fawtic-content a:hover {
+            background-color: #1a202c; 
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>嘂儿的博客</h1>
+        <nav>
+            <details class="fawtic-details">
+                <summary class="fawtic-summary">fawtic</summary>
+                <div class="fawtic-content">
+                    <a href="https://fawtic.vercel.app" target="_blank" rel="noopener noreferrer">Vercel入口</a>
+                    <a href="https://alt34555.johki.top/fawtic/" target="_blank" rel="noopener noreferrer">GitHub入口</a>
+                </div>
+            </details>
+
+            <a href="#" class="nav-link diary">diary</a>
+
+            <a href="#" class="nav-link record">record</a>
+        </nav>
+    </div>
+
+</body>
+</html>
