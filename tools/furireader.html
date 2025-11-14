@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注音阅读器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+            background-color: #8076a3; /* 背景色 */
+            color: #36292f; /* 文字颜色 */
+            line-height: 2.2; /* 增加行高以容纳注音 */
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* 容器样式 */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 15px;
+            margin-top: 0;
+        }
+
+        /* 文件上传区域样式 */
+        #drop-zone {
+            border: 3px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            margin-bottom: 30px;
+        }
+        #drop-zone p {
+            margin: 0;
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.9);
+            pointer-events: none; /* 允许点击穿透p标签到input */
+        }
+        #drop-zone.dragover {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: #ffffff;
+        }
+        #file-input {
+            display: none; /* 隐藏原始的文件输入框 */
+        }
+
+        /* 内容输出区域 */
+        #content {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 20px 30px;
+            text-align: justify;
+            min-height: 100px; /* 最小高度 */
+        }
+        #content p {
+            margin-bottom: 1.5em;
+        }
+        #content p:first-child {
+            margin-top: 0;
+        }
+        #content p:last-child {
+            margin-bottom: 0;
+        }
+        #content br {
+            display: block;
+            content: "";
+            margin-top: 1em;
+        }
+
+        /* Ruby 标签样式 (注音) */
+        ruby rt {
+            font-size: 0.7em;
+            color: #1e131d; /* 注音颜色 */
+            font-weight: 600; /* 如果可能的话加粗注音 */
+            transform: translateY(-0.25em);
+            /* 浏览器兼容性前缀 */
+            -webkit-transform: translateY(-0.25em);
+            -ms-transform: translateY(-0.25em);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>注音阅读器</h1>
+
+        <!-- 文件上传区域 -->
+        <div id="drop-zone">
+            <input type="file" id="file-input" accept=".txt">
+            <p>点击此处上传文件，或将 .txt 文件拖拽到这里</p>
+            <p id="file-name" style="font-weight: bold; margin-top: 10px;"></p>
+        </div>
+
+        <!-- 内容显示区域 -->
+        <h2> ——注音版—— </h2>
+        <div id="content">
+            <p style="color: rgba(255,255,255,0.7);"等待上传</p>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const contentDiv = document.getElementById('content');
+        const fileNameDisplay = document.getElementById('file-name');
+
+        // 点击区域时触发隐藏的文件输入框
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // 拖拽事件
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault(); // 阻止浏览器默认行为
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+
+            if (e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                if (file.type === 'text/plain') {
+                    fileInput.files = e.dataTransfer.files; // 将拖拽的文件交给input处理
+                    handleFile(file);
+                } else {
+                    alert('请上传 .txt 格式的文本文件。');
+                }
+            }
+        });
+
+        // 文件输入框内容改变时 (选择文件后)
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        /**
+         * 处理上传的文件
+         * @param {File} file - 用户上传的文件对象
+         */
+        function handleFile(file) {
+            fileNameDisplay.textContent = `已选择: ${file.name}`;
+            contentDiv.innerHTML = '<p style="color: rgba(255,255,255,0.7);">正在读取和转换...</p>';
+
+            const reader = new FileReader();
+
+            // 文件读取成功后
+            reader.onload = (e) => {
+                const text = e.target.result;
+                const htmlContent = convertTextToRubyHTML(text);
+                contentDiv.innerHTML = htmlContent;
+            };
+
+            // 文件读取失败
+            reader.onerror = (e) => {
+                contentDiv.innerHTML = '<p style="color: #ffcccc;">文件读取失败。</p>';
+                console.error("FileReader error:", e);
+            };
+
+            // 以文本形式读取文件
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        /**
+         * 将带括号的注音文本转换为使用 <ruby> 标签的 HTML。
+         * @param {string} text - 原始文本
+         * @returns {string} - 转换后的 HTML 字符串
+         */
+        function convertTextToRubyHTML(text) {
+            // 1. 转换 Ruby 标签
+            // (.*? ) 匹配要被注音的文本 (非贪婪)
+            // 〔(.*?)〕 匹配括号内的注音
+            const regex = /([^\〔]+?)〔([^\〕]+)〕/g;
+            
+            let html = text.replace(regex, (match, baseText, rubyText) => {
+                // 匹配结尾的汉字/片假名/平假名
+                // 这是为了将注音准确地只放在最后的词组上，而把前面的标点符号（如「）留在 ruby 标签之外
+                const japaneseCharsRegex = /([\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf\u3400-\u4dbf]+)$/;
+                const matchJapanese = baseText.match(japaneseCharsRegex);
+                
+                if (matchJapanese) {
+                    const charsToRuby = matchJapanese[1]; // 需要注音的字符
+                    const charsBefore = baseText.substring(0, baseText.length - charsToRuby.length); // 注音字符前的其他字符
+                    return `${charsBefore}<ruby>${charsToRuby}<rt>${rubyText}</rt></ruby>`;
+                } else {
+                    // 如果基础文本不是以日语字符结尾（例如 "SSW〔SSW〕"），则全部作为基础
+                    return `<ruby>${baseText}<rt>${rubyText}</rt></ruby>`;
+                }
+            });
+
+            // 2. 将换行符转换成 <p> 标签，以便在 HTML 中正确显示段落
+            return html.split('\n')
+                .map(line => line.trim()) // 去除首尾空格
+                .map(line => {
+                    if (line === '') {
+                        return '<br>'; // 保留空行（用<br>实现）
+                    }
+                    // 检查是否为标题（简单的判断逻辑）
+                    if (line.match(/^\d+-[^\d]/)) {
+                        return `<h3>${line}</h3>`;
+                    }
+                    return `<p>${line}</p>`; // 普通行转换为 <p>
+                })
+                .join('');
+        }
+    </script>
+
+</body>
+</html>

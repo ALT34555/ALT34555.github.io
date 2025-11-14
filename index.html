@@ -2,125 +2,182 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <!-- 确保在移动设备上正常显示 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>嘂儿的博客</title>
+    <title>嘂 - 欢迎</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Inter字体，一种简洁的无衬线字体，符合几何风格 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            background-color: #806d9e;
-            color: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .container {
-            text-align: center;
-            padding: 2rem;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 300; 
-            margin-bottom: 2.5rem;
-            color: #ffffff;
-        }
-
-        nav {
-            display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .nav-link,
-        .fawtic-summary {
-            padding: 0.8rem 1.8rem;
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: none;
-            display: inline-block; 
-        }
-
-        .nav-link:hover,
-        .fawtic-summary:hover {
-            opacity: 0.85;
-            transform: translateY(-2px); 
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .diary { background-color: #30161c; }
-        .record { background-color: #132c33; }
-        .fawtic-summary { background-color: #131824; }
-
-        .fawtic-details {
-            position: relative;
-            text-align: left;
-        }
-
-        .fawtic-summary {
-            list-style: none; 
-        }
-        .fawtic-summary::-webkit-details-marker {
-            display: none;
-        }
-
-        .fawtic-content {
-            position: absolute;
-            width: 100%;
-            background-color: #131824; 
-            border-radius: 0 0 8px 8px; 
-            margin-top: 0.5rem; 
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            z-index: 10;
-            padding: 0.5rem 0;
+        /* 自定义全局样式 */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* 背景色 */
+            background-color: #8076a3;
+            /* 确保内容区域至少占满整个屏幕 */
+            min-height: 100vh;
         }
         
-        .fawtic-details[open] .fawtic-summary {
-            border-radius: 8px 8px 0 0;
+        /* 定义星光闪烁的动画 */
+        @keyframes sparkle-anim {
+            0% {
+                /* 初始状态：不透明，原始大小 */
+                transform: scale(1) translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                /* 结束状态：完全透明，缩小并根据自定义属性随机移动 */
+                transform: scale(0) translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
         }
 
-        .fawtic-content a {
-            display: block;
-            padding: 0.75rem 1.5rem;
-            color: #e2e8f0;
-            text-decoration: none;
-            transition: background-color 0.2s ease;
+        /* 星光元素的基类 */
+        .sparkle {
+            position: absolute; /* 绝对定位，以便出现在点击位置 */
+            pointer-events: none; /* 穿透鼠标事件，不会遮挡下方元素 */
+            border-radius: 50%; /* 圆形 */
+            /* 动画：名称、时长、填充模式（保持结束状态） */
+            animation: sparkle-anim 0.8s forwards;
+            /* 初始时设置为透明，等待JS设置位置 */
+            opacity: 0;
         }
-
-        .fawtic-content a:hover {
-            background-color: #1a202c; 
-        }
-
     </style>
 </head>
-<body>
+<body class="text-[#f9e8d0] flex items-center justify-center p-4">
 
-    <div class="container">
-        <h1>嘂儿的博客</h1>
-        <nav>
-            <details class="fawtic-details">
-                <summary class="fawtic-summary">fawtic</summary>
-                <div class="fawtic-content">
-                    <a href="https://fawtic.vercel.app" target="_blank" rel="noopener noreferrer">Vercel入口</a>
-                    <a href="https://alt34555.johki.top/fawtic/" target="_blank" rel="noopener noreferrer">GitHub入口</a>
+    <!-- 主内容容器 -->
+    <main class="relative w-full max-w-lg text-center p-8 rounded-xl z-10">
+        
+        <!-- 装饰性的几何背景形状 -->
+        <!-- 这些是使用辅色创建的抽象形状，增强几何感 -->
+        <div class="absolute -top-16 -left-16 w-40 h-40 bg-[#c2b8e9] rounded-full opacity-30 transform rotate-45 z-0 mix-blend-lighten"></div>
+        <div class="absolute -bottom-20 -right-20 w-56 h-56 bg-[#57c3c2] rounded-lg opacity-40 transform rotate-12 z-0 mix-blend-lighten"></div>
+        <div class="absolute top-1/2 left-1/2 w-48 h-48 bg-[#5d90ba] rounded-full opacity-20 transform -translate-x-1/2 -translate-y-1/2 z-0 mix-blend-lighten"></div>
+
+
+        <!-- 博客标题 "嘂" -->
+        <h1 class="relative text-9xl md:text-[12rem] font-black text-[#f9e8d0] mb-8 z-10" style="text-shadow: 0 0 15px rgba(249, 232, 208, 0.3);">
+            嘂
+        </h1>
+
+        <!-- 导航链接 -->
+        <nav class="relative flex flex-col gap-4 z-10">
+            <!-- Fawtic 容器 -->
+            <div id="fawtic-container" class="relative w-full">
+                <!-- 链接 1: Fawtic (原始按钮) -->
+                <button id="fawtic-button" class="block w-full bg-[#5d90ba] hover:bg-opacity-80 text-[#f9e8d0] font-bold py-4 px-6 rounded-lg shadow-lg transition-all duration-300 ease-in-out text-xl transform hover:scale-105">
+                    Fawtic
+                </button>
+                
+                <!-- 新增：隐藏的链接容器 (修改为 flex-row) -->
+                <div id="fawtic-links" class="hidden flex flex-row gap-2 w-full">
+                    <!-- Vercel 入口 (w-1/2, 保持 py-4 高度) -->
+                    <a href="https://fawtic.vercel.app/" target="_blank" class="block w-1/2 bg-[#5d90ba] bg-opacity-80 hover:bg-opacity-100 text-[#f9e8d0] font-bold py-4 px-6 rounded-lg shadow-lg transition-all duration-300 ease-in-out text-lg transform hover:scale-105">
+                        Vercel入口
+                    </a>
+                    <!-- GitHub 入口 (w-1/2, 保持 py-4 高度) -->
+                    <a href="https://alt34555.johki.top/fawtic/" target="_blank" class="block w-1/2 bg-[#5d90ba] bg-opacity-80 hover:bg-opacity-100 text-[#f9e8d0] font-bold py-4 px-6 rounded-lg shadow-lg transition-all duration-300 ease-in-out text-lg transform hover:scale-105">
+                        GitHub入口
+                    </a>
                 </div>
-            </details>
+            </div>
+            
+            <!-- 分割线 -->
+            <p class="text-center text-[#c2b8e9] font-medium my-2 text-lg">
+                -- 小工具 --
+            </p>
 
-            <a href="#" class="nav-link diary">diary</a>
-
-            <a href="#" class="nav-link record">record</a>
+            <!-- 链接 2: 注音阅读器 -->
+            <a href="./tools/furireader.html" class="block w-full bg-[#57c3c2] hover:bg-opacity-80 text-[#f9e8d0] font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 ease-in-out text-lg transform hover:scale-105">
+                注音阅读器
+            </a>
+            <!-- 链接 3: 手动雨刷 -->
+            <a href="./tools/yushua.html" class="block w-full bg-[#57c3c2] hover:bg-opacity-80 text-[#f9e8d0] font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 ease-in-out text-lg transform hover:scale-105">
+                手动雨刷
+            </a>
+            <!-- 链接 4: 快速转码 -->
+            <a href="./tools/zhuanma.html" class="block w-full bg-[#57c3c2] hover:bg-opacity-80 text-[#f9e8d0] font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 ease-in-out text-lg transform hover:scale-105">
+                快速转码
+            </a>
         </nav>
-    </div>
 
+    </main>
+
+    <script>
+        // 监听点击和触摸事件
+        document.addEventListener('click', createSparkles);
+        // 对触摸事件做特殊处理，获取第一个触点信息
+        document.addEventListener('touchstart', (e) => createSparkles(e.touches[0]));
+
+        function createSparkles(e) {
+            // 获取点击/触摸的屏幕坐标
+            const x = e.clientX;
+            const y = e.clientY;
+
+            // 星光颜色池
+            const sparkleColors = ['#f9e8d0', '#c2b8e9', '#5d90ba', '#57c3c2'];
+            // 每次点击生成的星光数量
+            const sparkleCount = 10 + Math.floor(Math.random() * 5); // 10到15个
+
+            for (let i = 0; i < sparkleCount; i++) {
+                // 创建一个新的 span 元素作为星光
+                const sparkle = document.createElement('span');
+                sparkle.classList.add('sparkle');
+                
+                // 随机的水平和垂直迸发方向（通过CSS自定义属性传递给动画）
+                const tx = (Math.random() * 100 - 50) + 'px'; // -50px 到 +50px
+                const ty = (Math.random() * 100 - 50) + 'px'; // -50px 到 +50px
+                sparkle.style.setProperty('--tx', tx);
+                sparkle.style.setProperty('--ty', ty);
+
+                // 从颜色池中随机选择一个颜色
+                const color = sparkleColors[Math.floor(Math.random() * sparkleColors.length)];
+                sparkle.style.backgroundColor = color;
+                
+                // 随机大小
+                const size = Math.random() * 8 + 4 + 'px'; // 4px 到 12px
+                sparkle.style.width = size;
+                sparkle.style.height = size;
+
+                // 将星光定位到点击位置
+                sparkle.style.left = x + 'px';
+                sparkle.style.top = y + 'px';
+                
+                // 随机动画延迟，制造错落感
+                sparkle.style.animationDelay = (Math.random() * 0.2) + 's';
+                
+                // 设置透明度为1，触发动画
+                sparkle.style.opacity = 1;
+
+                // 将星光添加到 body
+                document.body.appendChild(sparkle);
+
+                // 动画结束后（约1秒）从DOM中移除该元素，防止内存泄漏
+                setTimeout(() => {
+                    sparkle.remove();
+                }, 1000); // 800ms 动画 + 200ms 缓冲
+            }
+        }
+
+        // --- 新增：Fawtic 按钮分裂功能 ---
+        
+        // 1. 获取元素
+        const fawticButton = document.getElementById('fawtic-button');
+        const fawticLinks = document.getElementById('fawtic-links');
+
+        // 2. 确保元素存在后再添加监听器
+        if (fawticButton && fawticLinks) {
+            fawticButton.addEventListener('click', () => {
+                // 隐藏 "Fawtic" 主按钮
+                fawticButton.classList.add('hidden');
+                
+                // 显示包含两个新链接的容器
+                fawticLinks.classList.remove('hidden');
+            });
+        }
+        // --- 功能结束 ---
+    </script>
 </body>
 </html>
