@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>🍌香蕉水印去除工具 | 免费图片工具</title>
+    <meta name="title" content="AI 闪光水印去除工具 | 免费图片工具" />
+    <meta
+      name="description"
+      content="一个用于去除 AI 生成图片中闪光水印的客户端工具。免费、私密且开源。"
+    />
+    <meta
+      name="keywords"
+      content="sparkle remover, ai watermark remover, gemini sparkle, ai image cleaner, client-side, free tool, 去水印, AI修图"
+    />
+    <meta name="author" content="Abhin Krishna" />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="香蕉水印去除工具" />
+    <meta
+      property="og:description"
+      content="去除香蕉水印，纯本地。"
+    />
+    <meta property="og:image" content="./assets/og-image.jpg" />
+    <meta property="twitter:card" content="summary_large_image" />
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script
+      defer
+      src="https://cloud.umami.is/script.js"
+      data-website-id="bf3b2209-f767-47d4-b127-69ce22c3cddf"
+    ></script>
+
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Montserrat", "sans-serif"],
+            },
+            colors: {
+              theme: {
+                // 用户指定背景色 #8076a3
+                light: "#8076a3", 
+                // 夜间模式背景加深
+                dark: "#2a2636",  
+                // 夜间模式卡片颜色
+                cardDark: "#353045", 
+              },
+              brand: {
+                // 用户指定辅助色1 (绿色)
+                primary: "#589c6c",  
+                primaryDark: "#457a54", // 夜间模式加深
+                // 用户指定辅助色2 (粉红)
+                secondary: "#e77c8e", 
+                secondaryDark: "#b55e6d", // 夜间模式加深
+                // 补充一个淡色用于渐变
+                accent: "#f5d0d6", 
+              },
+            },
+            animation: {
+              "fade-in": "fadeIn 0.5s ease-out",
+            },
+            keyframes: {
+              fadeIn: {
+                "0%": { opacity: "0", transform: "translateY(10px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      body {
+        font-family: "Montserrat", sans-serif;
+      }
+
+      body,
+      div,
+      nav,
+      header,
+      footer {
+        transition: background-color 0.3s ease, color 0.3s ease,
+          border-color 0.3s ease;
+      }
+
+      .hover-instagram:hover {
+        color: #e1306c;
+        transition: color 0.3s;
+      }
+      
+      /* 由于背景变深，滚动条样式优化 */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #2a2636;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #589c6c;
+        border-radius: 5px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #e77c8e;
+      }
+    </style>
+  </head>
+
+  <body
+    class="bg-theme-light dark:bg-theme-dark text-white dark:text-slate-200 antialiased flex flex-col min-h-screen selection:bg-brand-primary selection:text-white"
+  >
+    <header
+      class="sticky top-0 z-50 bg-white/90 dark:bg-theme-dark/90 backdrop-blur-md border-b border-white/10 dark:border-gray-800 shadow-sm"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between"
+      >
+        <div class="flex items-center gap-2 overflow-hidden">
+          <span class="text-3xl select-none">✨</span>
+          <h1
+            class="text-lg md:text-xl font-bold text-slate-800 dark:text-white whitespace-nowrap tracking-tight"
+          >
+            香蕉水印 <span class="text-brand-primary dark:text-brand-primary">去除工具</span>
+          </h1>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <button
+            id="themeToggle"
+            class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-slate-600 dark:text-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-brand-primary/50"
+            aria-label="切换夜间模式"
+          >
+            <iconify-icon
+              id="sunIcon"
+              icon="ph:sun-bold"
+              width="22"
+              class="hidden dark:block"
+            ></iconify-icon>
+            <iconify-icon
+              id="moonIcon"
+              icon="ph:moon-bold"
+              width="22"
+              class="block dark:hidden"
+            ></iconify-icon>
+          </button>
+
+          <nav
+            class="flex-shrink-0 border-l border-gray-200 dark:border-gray-700 pl-4"
+          >
+            <a
+              href="https://github.com/dearabhin/gemini-watermark-remover"
+              target="_blank"
+              class="text-slate-600 dark:text-slate-400 hover:text-brand-primary dark:hover:text-white transition-colors flex items-center gap-1 font-semibold text-sm md:text-base"
+            >
+              <iconify-icon icon="mdi:github" width="24"></iconify-icon>
+              <span class="hidden sm:inline">GitHub</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow w-full">
+      <section class="py-12 text-center px-4">
+        <h2
+          class="text-3xl md:text-5xl font-extrabold mb-4 pb-1 text-white dark:text-white tracking-tight drop-shadow-sm"
+        >
+          去除
+          <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary via-brand-secondary to-white"
+            >AI 闪光水印</span
+          >
+        </h2>
+
+        <p
+          class="text-slate-100 dark:text-slate-300 mb-8 max-w-xl mx-auto font-medium leading-relaxed text-base md:text-lg drop-shadow-sm"
+        >
+          瞬间去除 Gemini AI 图片中右下角的星星水印。
+          <span class="block md:inline"
+            >由您的浏览器进行客户端处理。</span
+          >
+          <span
+            class="block md:inline text-brand-secondary font-bold"
+            >免费、快速、无损且私密。</span
+          >
+        </p>
+
+        <div
+          class="max-w-5xl mx-auto bg-white dark:bg-theme-cardDark rounded-3xl shadow-xl dark:shadow-none p-4 border border-white/20 dark:border-gray-800 relative z-10 transition-colors"
+        >
+          <div
+            id="uploadArea"
+            class="group relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl bg-slate-50 dark:bg-gray-800/50 hover:bg-green-50 dark:hover:bg-gray-800 hover:border-brand-primary dark:hover:border-brand-primary transition-all cursor-pointer"
+          >
+            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+              <div
+                class="w-16 h-16 bg-white dark:bg-gray-700 rounded-full shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+              >
+                <iconify-icon
+                  icon="ph:upload-simple-bold"
+                  class="text-3xl text-gray-400 dark:text-gray-300 group-hover:text-brand-primary"
+                ></iconify-icon>
+              </div>
+              <p
+                class="mb-2 text-lg font-bold text-slate-700 dark:text-slate-200 group-hover:text-brand-primary transition-colors"
+              >
+                点击上传或拖拽图片到此处
+              </p>
+              <p class="text-sm text-slate-400 dark:text-slate-500">
+                支持 PNG, JPG, WebP 格式
+              </p>
+            </div>
+            <input
+              type="file"
+              id="fileInput"
+              accept="image/*"
+              multiple
+              class="hidden"
+            />
+          </div>
+
+          <div
+            id="previewSection"
+            class="hidden text-left mt-6 animate-fade-in"
+          >
+            <div class="flex flex-col lg:flex-row gap-8">
+              <!-- Dynamic preview container - will be populated by JS -->
+              <div id="previewContainer" class="flex-1 space-y-6 min-w-0">
+                <!-- Images will be added here dynamically -->
+              </div>
+
+              <div class="w-full lg:w-72 flex-shrink-0">
+                <div
+                  class="bg-white dark:bg-theme-cardDark rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 p-5 sticky top-24"
+                >
+                  <h4 class="font-bold text-slate-900 dark:text-white mb-4">
+                    操作
+                  </h4>
+
+                  <button
+                    id="downloadBtn"
+                    class="hidden group w-full py-3.5 relative overflow-hidden rounded-xl font-bold mb-3 text-white shadow-lg shadow-brand-primary/30 transition-all duration-300"
+                  >
+                    <div
+                      class="absolute inset-0 bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent opacity-100 group-hover:scale-110 transition-transform duration-500"
+                    ></div>
+                    <div
+                      class="relative flex items-center justify-center gap-2"
+                    >
+                      <iconify-icon
+                        icon="ph:download-simple-bold"
+                        width="20"
+                      ></iconify-icon>
+                      下载图片
+                    </div>
+                  </button>
+
+                  <button
+                    id="downloadAllBtn"
+                    class="hidden group w-full py-3.5 relative overflow-hidden rounded-xl font-bold mb-3 text-white shadow-lg shadow-green-500/30 transition-all duration-300"
+                  >
+                    <div
+                      class="absolute inset-0 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 opacity-100 group-hover:scale-110 transition-transform duration-500"
+                    ></div>
+                    <div
+                      class="relative flex items-center justify-center gap-2"
+                    >
+                      <iconify-icon
+                        icon="ph:file-zip-bold"
+                        width="20"
+                      ></iconify-icon>
+                      批量下载 (ZIP)
+                    </div>
+                  </button>
+
+                  <button
+                    id="resetBtn"
+                    class="w-full py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-slate-600 dark:text-slate-300 hover:border-brand-primary hover:text-brand-primary dark:hover:border-brand-primary dark:hover:text-brand-primary rounded-xl font-bold transition-all duration-300"
+                  >
+                    处理下一张
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="max-w-5xl mx-auto mt-16 text-left">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div
+              class="bg-white dark:bg-theme-cardDark p-6 rounded-3xl shadow-sm border border-transparent dark:border-gray-800 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-12 h-12 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-2xl flex items-center justify-center mb-4 text-2xl"
+              >
+                <iconify-icon icon="ph:sparkle-fill"></iconify-icon>
+              </div>
+              <h3 class="font-bold text-slate-900 dark:text-white mb-2 text-lg">
+                100% 无损画质
+              </h3>
+              <p
+                class="text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed font-medium"
+              >
+                画质保持 100% 完美。无压缩，无伪影。通过数学方法精准还原原始像素。
+              </p>
+            </div>
+
+            <div
+              class="bg-white dark:bg-theme-cardDark p-6 rounded-3xl shadow-sm border border-transparent dark:border-gray-800 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-4 text-2xl"
+              >
+                <iconify-icon icon="ph:lock-key-fill"></iconify-icon>
+              </div>
+              <h3 class="font-bold text-slate-900 dark:text-white mb-2 text-lg">
+                隐私优先
+              </h3>
+              <p
+                class="text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed font-medium"
+              >
+                工具完全在您的浏览器内运行（客户端）。您的照片永远不会上传到任何服务器。
+              </p>
+            </div>
+
+            <div
+              class="bg-white dark:bg-theme-cardDark p-6 rounded-3xl shadow-sm border border-transparent dark:border-gray-800 hover:shadow-md transition-shadow"
+            >
+              <div
+                class="w-12 h-12 bg-green-50 dark:bg-green-900/20 text-brand-primary dark:text-green-400 rounded-2xl flex items-center justify-center mb-4 text-2xl"
+              >
+                <iconify-icon icon="ph:code-bold"></iconify-icon>
+              </div>
+              <h3 class="font-bold text-slate-900 dark:text-white mb-2 text-lg">
+                开源项目
+              </h3>
+              <p
+                class="text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed font-medium"
+              >
+                完全免费且开源。开发者可以在
+                <a
+                  href="https://github.com/dearabhin/gemini-watermark-remover"
+                  class="text-brand-primary hover:underline"
+                  >GitHub</a
+                >
+                上查看代码。
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+              class="bg-blue-50/90 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-3xl p-6"
+            >
+              <h4
+                class="flex items-center gap-2 font-bold text-blue-900 dark:text-blue-300 mb-3"
+              >
+                <iconify-icon
+                  icon="ph:info-fill"
+                  class="text-xl"
+                ></iconify-icon>
+                温馨提示
+              </h4>
+              <p
+                class="text-sm md:text-base text-blue-800/80 dark:text-blue-300/70 leading-relaxed font-medium"
+              >
+                此工具仅为了美观（如演示或模型展示）去除**可见的图标**。它
+                <span class="underline">不会</span>去除 Google 为了安全嵌入的隐形 "SynthID" 水印。
+              </p>
+            </div>
+
+            <div
+              class="bg-amber-50/90 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-3xl p-6"
+            >
+              <h4
+                class="flex items-center gap-2 font-bold text-amber-900 dark:text-amber-400 mb-3"
+              >
+                <iconify-icon
+                  icon="ph:warning-fill"
+                  class="text-xl"
+                ></iconify-icon>
+                重要规则
+              </h4>
+              <p
+                class="text-sm md:text-base text-amber-900 dark:text-amber-200 mb-3 font-medium"
+              >
+                为了算法生效，您必须使用**原始下载的图片文件**。
+              </p>
+              <ul
+                class="space-y-2 text-sm md:text-base text-amber-800/80 dark:text-amber-300/70 font-medium"
+              >
+                <li class="flex items-center gap-2">
+                  <span class="text-red-500">×</span> 不要使用右键“另存为”
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="text-red-500">×</span> 不要使用截图
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="text-emerald-600">✓</span> 请使用 Gemini 界面上的
+                  <strong>下载</strong> 按钮
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer
+      class="bg-white dark:bg-theme-cardDark border-t border-white/20 dark:border-gray-800 mt-auto"
+    >
+      <div class="max-w-7xl mx-auto px-4 py-8 text-center">
+        <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">
+          开发者：
+          <span class="font-bold text-slate-900 dark:text-white"
+            >Abhin Krishna</span
+          >
+        </p>
+        <div
+          class="flex justify-center gap-6 mt-4 text-slate-400 dark:text-slate-500"
+        >
+          <a
+            href="https://twitter.com/dearabhin"
+            target="_blank"
+            class="hover:text-black dark:hover:text-white hover:scale-110 transition-transform"
+            ><iconify-icon icon="line-md:twitter-x" width="24"></iconify-icon
+          ></a>
+          <a
+            href="https://instagram.com/abhin.io"
+            target="_blank"
+            class="hover-instagram hover:scale-110 transition-transform"
+            ><iconify-icon icon="mdi:instagram" width="24"></iconify-icon
+          ></a>
+          <a
+            href="https://github.com/dearabhin"
+            target="_blank"
+            class="hover:text-black dark:hover:text-white hover:scale-110 transition-transform"
+            ><iconify-icon icon="mdi:github" width="24"></iconify-icon
+          ></a>
+          <a
+            href="https://linkedin.com/in/abhin-krishna"
+            target="_blank"
+            class="hover:text-[#0077b5] hover:scale-110 transition-transform"
+            ><iconify-icon icon="mdi:linkedin" width="24"></iconify-icon
+          ></a>
+        </div>
+        <p class="text-xs text-slate-400 dark:text-slate-600 mt-4">
+          免责声明：本项目与 Google Gemini 无关。<br />
+          © 2025 AI 闪光水印去除工具。保留所有权利。
+        </p>
+      </div>
+    </footer>
+
+    <div
+      id="loadingOverlay"
+      class="fixed inset-0 bg-white/90 dark:bg-theme-dark/90 backdrop-blur-sm z-50 hidden items-center justify-center"
+    >
+      <div class="flex flex-col items-center">
+        <div
+          class="w-16 h-16 rounded-full border-4 border-transparent border-t-brand-primary border-r-brand-secondary border-b-brand-accent animate-spin mb-4"
+        ></div>
+        <p class="text-brand-primary font-bold text-lg animate-pulse">
+          处理中...
+        </p>
+      </div>
+    </div>
+
+    <script>
+      // --- THEME TOGGLE LOGIC ---
+      const themeToggleBtn = document.getElementById("themeToggle");
+      const htmlElement = document.documentElement;
+
+      // Check LocalStorage or System Preference
+      if (
+        localStorage.theme === "dark" ||
+        (!("theme" in localStorage) &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        htmlElement.classList.add("dark");
+      } else {
+        htmlElement.classList.remove("dark");
+      }
+
+      themeToggleBtn.addEventListener("click", () => {
+        if (htmlElement.classList.contains("dark")) {
+          htmlElement.classList.remove("dark");
+          localStorage.theme = "light";
+        } else {
+          htmlElement.classList.add("dark");
+          localStorage.theme = "dark";
+        }
+      });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>
