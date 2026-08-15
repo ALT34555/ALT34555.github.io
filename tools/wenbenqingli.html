@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本清理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+        tailwind.config = { theme: { extend: { colors: {
+            theme: 'var(--accent-color)', bg: 'var(--bg-color)',
+            redAlert: '#CB3A56', redDark: '#82111f',
+            blueAlt: 'var(--header-text-color)', whiteAlt: 'var(--border-color)',
+            blackAlt: 'var(--text-color)'
+        }}}}
+    </script>
+    <style>
+        .custom-checkbox:checked {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(129, 92, 148, 0.3);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col font-sans overflow-hidden text-blackAlt">
+    <!-- Global App Window Titlebar -->
+    <div class="window-titlebar" style="border-top: none; border-left: none; border-right: none;">
+        <div class="title-content">
+            <span class="window-icon" style="font-size:1rem; font-weight:800; font-family:monospace;">_ TXT _</span>
+            <h2 class="window-title" style="font-size:1rem;">文本清理</h2>
+        </div>
+        <div class="window-controls theme-controls">
+            <input type="range" min="-1" max="1" step="1" class="tone-slider" title="调整冷暖色调">
+            <div class="mode-square-btn" title="切换深浅色">昼</div>
+            <div class="mode-square-btn" style="background:var(--accent-color); color:#fff; border-color:var(--accent-color);" onclick="window.location.href='../index.html'" title="返回首页">⚪</div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 p-4 md:p-6 flex flex-col gap-4 overflow-hidden">
+        
+            
+            <!-- 清理选项面板 -->
+            <div class="bg-theme/5 p-4  border border-theme/20 shadow-inner">
+                <h2 class="text-lg font-bold mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-theme" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    清理规则设置
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <label class="flex items-center gap-2 cursor-pointer hover:text-theme transition-colors">
+                        <input type="checkbox" id="opt-spaces" checked class="custom-checkbox w-5 h-5  border-2 border-theme text-theme focus:ring-theme focus:ring-offset-whiteAlt transition-all appearance-none flex items-center justify-center after:content-['✓'] after:text-whiteAlt after:opacity-0 checked:after:opacity-100">
+                        删除多余空格 (含不可见字符)
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:text-theme transition-colors">
+                        <input type="checkbox" id="opt-newlines" checked class="custom-checkbox w-5 h-5  border-2 border-theme text-theme focus:ring-theme focus:ring-offset-whiteAlt transition-all appearance-none flex items-center justify-center after:content-['✓'] after:text-whiteAlt after:opacity-0 checked:after:opacity-100">
+                        删除多余换行 (合并空白行)
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:text-theme transition-colors">
+                        <input type="checkbox" id="opt-markdown" checked class="custom-checkbox w-5 h-5  border-2 border-theme text-theme focus:ring-theme focus:ring-offset-whiteAlt transition-all appearance-none flex items-center justify-center after:content-['✓'] after:text-whiteAlt after:opacity-0 checked:after:opacity-100">
+                        修复冗余 Markdown (*号/#号)
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:text-theme transition-colors">
+                        <input type="checkbox" id="opt-punctuation" checked class="custom-checkbox w-5 h-5  border-2 border-theme text-theme focus:ring-theme focus:ring-offset-whiteAlt transition-all appearance-none flex items-center justify-center after:content-['✓'] after:text-whiteAlt after:opacity-0 checked:after:opacity-100">
+                        <span title="保留数字间的小数点，修复中英文引号与半角标点">修正标点符号 (半角转全角/引号)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer hover:text-theme transition-colors">
+                        <input type="checkbox" id="opt-tags" checked class="custom-checkbox w-5 h-5  border-2 border-theme text-theme focus:ring-theme focus:ring-offset-whiteAlt transition-all appearance-none flex items-center justify-center after:content-['✓'] after:text-whiteAlt after:opacity-0 checked:after:opacity-100">
+                        清理引用与 HTML 标签符号
+                    </label>
+                </div>
+            </div>
+
+            <!-- 输入输出区域 -->
+            <div class="flex flex-col md:flex-row gap-6 h-[450px]">
+                <!-- 输入框 -->
+                <div class="flex-1 flex flex-col">
+                    <label class="font-bold mb-2 text-theme flex justify-between items-end">
+                        原始文本
+                        <span class="text-xs font-normal opacity-70" id="input-stats">0 字</span>
+                    </label>
+                    <textarea id="input-text" class="flex-1 resize-none glass-card  text-left p-4" placeholder="在此粘贴需要清理的文本...&#10;支持包含大量乱码空格、多余空行、英文标点的杂乱文本。"></textarea>
+                </div>
+                
+                <!-- 转换箭头 (桌面端) -->
+                <div class="hidden md:flex flex-col justify-center items-center">
+                    <button id="btn-clean-center" class="bg-theme text-whiteAlt p-3 -full shadow-lg hover:bg-blueAlt hover:scale-110 transition-all duration-300 group" title="立即清理">
+                        <svg class="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+
+                <!-- 输出框 -->
+                <div class="flex-1 flex flex-col">
+                    <label class="font-bold mb-2 text-theme flex justify-between items-end">
+                        清理结果
+                        <span class="text-xs font-normal opacity-70" id="output-stats">0 字</span>
+                    </label>
+                    <textarea id="output-text" readonly class="flex-1 resize-none glass-card  text-left p-4" placeholder="清理后的文本将在此显示..."></textarea>
+                </div>
+            </div>
+
+            <!-- 底部操作按钮 -->
+            <div class="flex flex-wrap justify-center gap-4 mt-2 border-t border-theme/20 pt-6">
+                <button id="btn-clean" class="bg-theme hover:bg-blueAlt text-whiteAlt font-bold py-3 px-8  shadow-md transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    一键清理
+                </button>
+                <button id="btn-copy" class="bg-blueAlt hover:bg-theme text-whiteAlt font-bold py-3 px-8  shadow-md transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    复制结果
+                </button>
+                <button id="btn-clear" class="bg-redAlert hover:bg-redDark text-whiteAlt font-bold py-3 px-8  shadow-md transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    清空内容
+                </button>
+            </div>
+        
+    </div>
+
+    <div id="toast" class="absolute top-4 left-1/2 transform -translate-x-1/2 bg-blueAlt text-whiteAlt px-6 py-3 shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+        <span id="toast-msg">提示信息</span>
+    </div>
+
+    <script>
+        // DOM 元素获取
+        const inputText = document.getElementById('input-text');
+        const outputText = document.getElementById('output-text');
+        const btnClean = document.getElementById('btn-clean');
+        const btnCleanCenter = document.getElementById('btn-clean-center');
+        const btnCopy = document.getElementById('btn-copy');
+        const btnClear = document.getElementById('btn-clear');
+        const inputStats = document.getElementById('input-stats');
+        const outputStats = document.getElementById('output-stats');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
+
+        // 字数统计实时更新
+        inputText.addEventListener('input', () => {
+            inputStats.textContent = `${inputText.value.length} 字`;
+        });
+
+        // 核心清理逻辑函数
+        function processText() {
+            let text = inputText.value;
+            
+            if (!text.trim()) {
+                showToast('请输入需要清理的文本！', true);
+                return;
+            }
+
+            // 1. 删除多余的空格（包括不可见的非字符符号）
+            if (document.getElementById('opt-spaces').checked) {
+                // 移除零宽字符、不可见格式符
+                text = text.replace(/[\u200B-\u200D\uFEFF\u200E\u200F\u202A-\u202E]/g, '');
+                // 将多个连续空格（全角/半角）/Tab 替换为一个普通空格，但保留换行符
+                text = text.replace(/[ \t\f\v\u3000]+/g, ' ');
+                // 移除每行行首和行尾的空格
+                text = text.split('\n').map(line => line.trim()).join('\n');
+            }
+
+            // 2. 删除多余的换行
+            if (document.getElementById('opt-newlines').checked) {
+                // 将 3 个或以上的连续换行替换为 2 个换行（即段落间保留一个空行）
+                text = text.replace(/\n{3,}/g, '\n\n');
+            }
+
+            // 3. 修复Markdown语法中多余的*号、#号等
+            if (document.getElementById('opt-markdown').checked) {
+                // 超过3个的*号收缩为2个 (粗体)
+                text = text.replace(/\*{3,}/g, '**');
+                // 超过6个的#号收缩为6个 (Markdown最多h6)
+                text = text.replace(/#{7,}/g, '######');
+                // 修复多余的分割线符号 - 或 ~
+                text = text.replace(/-{4,}/g, '---');
+                text = text.replace(/~{3,}/g, '~~');
+            }
+
+            // 4. 修正标点符号
+            if (document.getElementById('opt-punctuation').checked) {
+                // 智能替换英文双引号为中文双引号
+                text = text.replace(/"([^"]*)"/g, '“$1”');
+                // 智能替换英文单引号为中文单引号
+                text = text.replace(/'([^']*)'/g, '‘$1’');
+                
+                // 为了防止替换小数点和网址，先将数字之间的点临时替换
+                text = text.replace(/([0-9])\.([0-9])/g, '$1_TEMP_DOT_$2');
+                
+                // 半角转全角
+                text = text.replace(/,/g, '，');
+                text = text.replace(/\./g, '。');
+                text = text.replace(/!/g, '！');
+                text = text.replace(/\?/g, '？');
+                
+                // 恢复小数点
+                text = text.replace(/_TEMP_DOT_/g, '.');
+
+                // 将多余的连续中文标点规范化 (如 。。。 -> ……)
+                text = text.replace(/。{3,}/g, '……');
+                text = text.replace(/！{2,}/g, '！！');
+                text = text.replace(/？{2,}/g, '？？');
+            }
+
+            // 5. 清理引用与标签符号
+            if (document.getElementById('opt-tags').checked) {
+                // 移除 HTML 标签
+                text = text.replace(/<[^>]+>/g, '');
+                // 修复多级引用符号 >>>，将其规范为单个 >
+                text = text.replace(/^>{2,}\s*/gm, '> ');
+            }
+
+            // 渲染结果
+            outputText.value = text;
+            outputStats.textContent = `${text.length} 字`;
+            showToast('文本清理完成！');
+        }
+
+        // 绑定清理事件
+        btnClean.addEventListener('click', processText);
+        btnCleanCenter.addEventListener('click', processText);
+
+        // 绑定清空事件
+        btnClear.addEventListener('click', () => {
+            inputText.value = '';
+            outputText.value = '';
+            inputStats.textContent = '0 字';
+            outputStats.textContent = '0 字';
+            showToast('内容已清空', true);
+        });
+
+        // 绑定复制事件
+        btnCopy.addEventListener('click', () => {
+            if (!outputText.value) {
+                showToast('没有可复制的内容', true);
+                return;
+            }
+            
+            // 兼容性复制到剪贴板
+            try {
+                navigator.clipboard.writeText(outputText.value).then(() => {
+                    showToast('✅ 结果已复制到剪贴板！');
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(outputText.value);
+                });
+            } catch (err) {
+                fallbackCopyTextToClipboard(outputText.value);
+            }
+        });
+
+        // 后备复制方案
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast('✅ 结果已复制到剪贴板！');
+            } catch (err) {
+                showToast('复制失败，请手动选择复制', true);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // 提示框函数
+        let toastTimeout;
+        function showToast(message, isAlert = false) {
+            toastMsg.textContent = message;
+            
+            if(isAlert) {
+                toast.classList.replace('bg-blueAlt', 'bg-redAlert');
+            } else {
+                toast.classList.replace('bg-redAlert', 'bg-blueAlt');
+            }
+
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 3000);
+        }
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

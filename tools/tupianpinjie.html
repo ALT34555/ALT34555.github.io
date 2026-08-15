@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片拼接</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+        tailwind.config = { theme: { extend: { colors: {
+            theme: 'var(--accent-color)', bg: 'var(--bg-color)',
+            redAlert: '#CB3A56', redDark: '#82111f',
+            blueAlt: 'var(--header-text-color)', whiteAlt: 'var(--border-color)',
+            blackAlt: 'var(--text-color)'
+        }}}}
+    </script>
+    <style>
+        .checkerboard {
+            background-color: #fbecde;
+            background-image: 
+                linear-gradient(45deg, #e0d5c1 25%, transparent 25%, transparent 75%, #e0d5c1 75%, #e0d5c1),
+                linear-gradient(45deg, #e0d5c1 25%, transparent 25%, transparent 75%, #e0d5c1 75%, #e0d5c1);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col font-sans overflow-hidden text-blackAlt">
+    <!-- Global App Window Titlebar -->
+    <div class="window-titlebar" style="border-top: none; border-left: none; border-right: none;">
+        <div class="title-content">
+            <span class="window-icon" style="font-size:1rem; font-weight:800; font-family:monospace;">[ + ]</span>
+            <h2 class="window-title" style="font-size:1rem;">图片拼接</h2>
+        </div>
+        <div class="window-controls theme-controls">
+            <input type="range" min="-1" max="1" step="1" class="tone-slider" title="调整冷暖色调">
+            <div class="mode-square-btn" title="切换深浅色">昼</div>
+            <div class="mode-square-btn" style="background:var(--accent-color); color:#fff; border-color:var(--accent-color);" onclick="window.location.href='../index.html'" title="返回首页">⚪</div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 p-4 md:p-6 flex flex-col gap-4 overflow-hidden">
+        <div class="w-full h-full flex flex-col md:flex-row gap-4 overflow-hidden">
+            <aside class="w-full md:w-80 flex-shrink-0 flex flex-col glass-card  overflow-y-auto">
+                <div class="p-6 flex-grow space-y-6">
+                    <!-- 文件上传 -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">1. 选择图片</label>
+                        <div class="flex gap-2">
+                            <label class="flex-grow cursor-pointer bg-blueAlt hover:bg-theme text-whiteAlt py-2 px-4 text-center transition-colors">
+                                <span>点击上传多张图片</span>
+                                <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+                            </label>
+                            <button id="clearBtn" class="bg-redAlert hover:bg-redDark text-whiteAlt py-2 px-4 transition-colors" title="清空所有图片">清空</button>
+                        </div>
+                        <div id="imageCount" class="text-xs mt-2 text-blueAlt font-medium">已加载 0 张图片</div>
+                    </div>
+
+                    <!-- 排列设置 -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">2. 排列方式</label>
+                            <div class="flex gap-4">
+                                <label class="flex items-center gap-1 cursor-pointer text-sm">
+                                    <input type="radio" name="layout" value="row" checked class="accent-theme"> 横向(按行)
+                                </label>
+                                <label class="flex items-center gap-1 cursor-pointer text-sm">
+                                    <input type="radio" name="layout" value="col" class="accent-theme"> 纵向(按列)
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1 font-semibold">每行/列数量</label>
+                            <input type="number" id="wrapCount" min="1" value="3" class="w-full bg-white border border-bg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-theme">
+                        </div>
+                    </div>
+
+                    <!-- 对齐方案 -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold mb-2">3. 对齐方案</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="hAlign" class="w-full bg-white border border-bg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-theme">
+                                <option value="center">水平居中</option>
+                                <option value="left">靠左对齐</option>
+                                <option value="right">靠右对齐</option>
+                            </select>
+                            <select id="vAlign" class="w-full bg-white border border-bg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-theme">
+                                <option value="center">垂直居中</option>
+                                <option value="top">顶端对齐</option>
+                                <option value="bottom">底端对齐</option>
+                            </select>
+                        </div>
+                        <!-- 紧凑排列选项 -->
+                        <div class="pt-2">
+                            <label class="flex items-center gap-2 cursor-pointer text-sm font-semibold text-theme">
+                                <input type="checkbox" id="compact" class="accent-theme w-4 h-4" checked>
+                                启用紧凑排列 (推荐)
+                            </label>
+                            <p class="text-xs leading-relaxed text-blackAlt opacity-75 font-normal text-left mt-1 ml-6">开启后不统一网格大小，消除小图片周围多余空白</p>
+                        </div>
+                    </div>
+
+                    <!-- 间距与图片调整 -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">4. 图片间距 (px)</label>
+                            <input type="number" id="spacing" min="0" value="10" class="w-full bg-white border border-bg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-theme">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">5. 图片调整</label>
+                            <div class="space-y-3">
+                                <div id="stretchContainer">
+                                    <label class="flex items-center gap-2 cursor-pointer text-sm font-semibold text-theme">
+                                        <input type="checkbox" id="stretch" class="accent-theme w-4 h-4">
+                                        拉伸图片以充满网格区域
+                                    </label>
+                                    <p class="text-xs leading-relaxed text-blackAlt opacity-75 font-normal text-left mt-1 ml-6">仅在关闭“紧凑排列”时生效</p>
+                                </div>
+                                <div>
+                                    <label class="flex items-center gap-2 cursor-pointer text-sm font-semibold text-theme">
+                                        <input type="checkbox" id="uniformSize" class="accent-theme w-4 h-4">
+                                        统一高度或宽度
+                                    </label>
+                                    <div id="uniformSizeSettings" class="mt-2 ml-6 hidden flex items-center gap-2">
+                                        <select id="uniformMode" class="bg-white border border-bg p-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-theme">
+                                            <option value="width">统一宽度</option>
+                                            <option value="height">统一高度</option>
+                                        </select>
+                                        <input type="number" id="uniformValue" value="500" min="10" class="w-20 bg-white border border-bg p-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-theme">
+                                        <span class="text-sm">px</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 背景颜色 -->
+                    <div class="p-4 bg-gray-50/50 border border-bg">
+                        <label class="block text-sm font-semibold mb-2">6. 背景设置</label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm mb-3">
+                            <input type="checkbox" id="bgTransparent" class="accent-theme w-4 h-4">
+                            背景透明 (导出为PNG)
+                        </label>
+                        <div class="flex items-center gap-2" id="bgColorContainer">
+                            <input type="color" id="bgColor" value="#8076a3" class="w-8 h-8 cursor-pointer border-0 p-0">
+                            <input type="text" id="bgHex" value="#8076a3" class="flex-grow bg-white border border-bg p-1.5 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-theme">
+                        </div>
+                    </div>
+
+                    <!-- 输出尺寸 -->
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">7. 调整输出尺寸</label>
+                        <select id="resizeMode" class="w-full bg-white border border-bg p-2 mb-2 text-sm focus:outline-none focus:ring-2 focus:ring-theme">
+                            <option value="original">原始尺寸 (根据内容自动计算)</option>
+                            <option value="width">自定义总宽度</option>
+                            <option value="height">自定义总高度</option>
+                        </select>
+                        <div id="resizeValueContainer" class="hidden">
+                            <input type="number" id="resizeValue" placeholder="输入像素值" min="10" class="w-full bg-white border border-bg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-theme">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部操作区 -->
+                <div class="p-4 bg-white/20 border-t border-bg mt-auto">
+                    <button id="downloadBtn" class="w-full bg-theme hover:bg-blueAlt text-whiteAlt font-bold py-3 px-4 shadow-md transition-colors flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        保存拼接图片
+                    </button>
+                </div>
+            </aside>
+
+            <main class="flex-1 flex flex-col glass-card  checkerboard relative overflow-hidden">
+                <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-blueAlt pointer-events-none opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <p class="text-xl font-bold">请在左侧上传图片进行拼接</p>
+                </div>
+                
+                <!-- 拖拽操作提示 -->
+                <div class="w-full flex justify-center mb-4 sticky top-0 z-10 pointer-events-none">
+                    <div id="dragTip" class="hidden text-theme font-bold bg-white/80 backdrop-blur-sm px-5 py-2.5 text-sm shadow-md border border-theme/20">
+                        💡 提示：在图片上直接拖拽即可调整排列顺序
+                    </div>
+                </div>
+
+                <div class="flex justify-center items-start min-h-full pb-10">
+                    <canvas id="previewCanvas" class="max-w-full shadow-2xl hidden transition-all duration-75" style="background-color: transparent;"></canvas>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // 核心状态管理
+        const state = {
+            images: [], // 存储已加载的 Image 对象
+            hitBoxes: [] // 存储拖拽所需的各图片物理坐标
+        };
+
+        // 拖拽控制状态
+        const dragState = {
+            isDragging: false,
+            startIndex: -1,
+            currentIndex: -1,
+            mouseX: 0,
+            mouseY: 0,
+            activeBox: null
+        };
+
+        // DOM 元素引用
+        const els = {
+            fileInput: document.getElementById('fileInput'),
+            clearBtn: document.getElementById('clearBtn'),
+            imageCount: document.getElementById('imageCount'),
+            layout: document.getElementsByName('layout'),
+            wrapCount: document.getElementById('wrapCount'),
+            hAlign: document.getElementById('hAlign'),
+            vAlign: document.getElementById('vAlign'),
+            compact: document.getElementById('compact'),
+            spacing: document.getElementById('spacing'),
+            stretch: document.getElementById('stretch'),
+            stretchContainer: document.getElementById('stretchContainer'),
+            uniformSize: document.getElementById('uniformSize'),
+            uniformSizeSettings: document.getElementById('uniformSizeSettings'),
+            uniformMode: document.getElementById('uniformMode'),
+            uniformValue: document.getElementById('uniformValue'),
+            bgTransparent: document.getElementById('bgTransparent'),
+            bgColor: document.getElementById('bgColor'),
+            bgHex: document.getElementById('bgHex'),
+            resizeMode: document.getElementById('resizeMode'),
+            resizeValueContainer: document.getElementById('resizeValueContainer'),
+            resizeValue: document.getElementById('resizeValue'),
+            downloadBtn: document.getElementById('downloadBtn'),
+            canvas: document.getElementById('previewCanvas'),
+            emptyState: document.getElementById('emptyState'),
+            dragTip: document.getElementById('dragTip'),
+            bgColorContainer: document.getElementById('bgColorContainer')
+        };
+
+        const ctx = els.canvas.getContext('2d');
+
+        // 事件监听设置
+        function initEvents() {
+            els.fileInput.addEventListener('change', handleFiles);
+            els.clearBtn.addEventListener('click', clearImages);
+            els.downloadBtn.addEventListener('click', downloadCanvas);
+
+            // 控制面板任何更改时重新绘制
+            const inputs = [
+                els.wrapCount, els.hAlign, els.vAlign, els.compact, els.spacing, 
+                els.stretch, els.uniformSize, els.uniformMode, els.uniformValue, 
+                els.bgTransparent, els.bgColor, els.resizeMode, els.resizeValue
+            ];
+            inputs.forEach(input => input.addEventListener('input', drawPreview));
+            inputs.forEach(input => input.addEventListener('change', drawPreview));
+            
+            els.layout.forEach(radio => radio.addEventListener('change', drawPreview));
+
+            // 背景颜色联动处理
+            els.bgColor.addEventListener('input', (e) => {
+                els.bgHex.value = e.target.value.toUpperCase();
+                drawPreview();
+            });
+            els.bgHex.addEventListener('input', (e) => {
+                let val = e.target.value;
+                if(val.match(/^#[0-9A-Fa-f]{6}$/)) {
+                    els.bgColor.value = val;
+                    drawPreview();
+                }
+            });
+
+            // 透明度复选框切换时，禁用/启用颜色选择
+            els.bgTransparent.addEventListener('change', (e) => {
+                els.bgColorContainer.style.opacity = e.target.checked ? '0.5' : '1';
+                els.bgColor.disabled = e.target.checked;
+                els.bgHex.disabled = e.target.checked;
+                drawPreview();
+            });
+
+            // 统一图片尺寸控制面板显隐
+            els.uniformSize.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    els.uniformSizeSettings.classList.remove('hidden');
+                } else {
+                    els.uniformSizeSettings.classList.add('hidden');
+                }
+                drawPreview();
+            });
+
+            // 紧凑模式与拉伸的联动提示
+            els.compact.addEventListener('change', (e) => {
+                if(e.target.checked) {
+                    els.stretchContainer.style.opacity = '0.4';
+                    els.stretch.disabled = true;
+                } else {
+                    els.stretchContainer.style.opacity = '1';
+                    els.stretch.disabled = false;
+                }
+            });
+
+            // 调整尺寸模式切换
+            els.resizeMode.addEventListener('change', (e) => {
+                if (e.target.value === 'original') {
+                    els.resizeValueContainer.classList.add('hidden');
+                } else {
+                    els.resizeValueContainer.classList.remove('hidden');
+                    els.resizeValue.placeholder = e.target.value === 'width' ? '输入新宽度 (px)' : '输入新高度 (px)';
+                }
+                drawPreview();
+            });
+            
+            // 初始化检查紧凑模式状态
+            if(els.compact.checked) {
+                els.stretchContainer.style.opacity = '0.4';
+                els.stretch.disabled = true;
+            }
+
+            // === 绑定 Canvas 拖拽事件 ===
+            els.canvas.addEventListener('mousedown', handleMouseDown);
+            els.canvas.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+            els.canvas.addEventListener('mouseleave', handleMouseLeave);
+        }
+
+        // 获取鼠标在 Canvas 内部的真实坐标 (应对 CSS 缩放)
+        function getMousePos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (evt.clientX - rect.left) * scaleX,
+                y: (evt.clientY - rect.top) * scaleY
+            };
+        }
+
+        function handleMouseDown(e) {
+            if (state.images.length <= 1) return;
+            const pos = getMousePos(els.canvas, e);
+            const hit = state.hitBoxes.find(b => pos.x >= b.x && pos.x <= b.x + b.w && pos.y >= b.y && pos.y <= b.y + b.h);
+            
+            if (hit) {
+                dragState.isDragging = true;
+                dragState.startIndex = hit.index;
+                dragState.currentIndex = hit.index;
+                dragState.activeBox = hit;
+                dragState.mouseX = pos.x;
+                dragState.mouseY = pos.y;
+                els.canvas.style.cursor = 'grabbing';
+                drawPreview();
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (state.images.length === 0) return;
+            const pos = getMousePos(els.canvas, e);
+
+            if (dragState.isDragging) {
+                dragState.mouseX = pos.x;
+                dragState.mouseY = pos.y;
+                const hit = state.hitBoxes.find(b => pos.x >= b.x && pos.x <= b.x + b.w && pos.y >= b.y && pos.y <= b.y + b.h);
+                dragState.currentIndex = hit ? hit.index : -1;
+                drawPreview(); // 刷新绘制以显示拖动轨迹和悬浮效果
+            } else {
+                // 仅悬停时改变指针样式
+                const hit = state.hitBoxes.find(b => pos.x >= b.x && pos.x <= b.x + b.w && pos.y >= b.y && pos.y <= b.y + b.h);
+                els.canvas.style.cursor = hit ? 'grab' : 'default';
+            }
+        }
+
+        function handleMouseLeave() {
+            if (dragState.isDragging) {
+                dragState.currentIndex = -1; // 拖出边界时取消当前有效目标
+                drawPreview();
+            }
+        }
+
+        function handleMouseUp() {
+            if (dragState.isDragging) {
+                // 如果落在了有效的且不同的目标上，执行数组重排
+                if (dragState.currentIndex !== -1 && dragState.currentIndex !== dragState.startIndex) {
+                    const item = state.images.splice(dragState.startIndex, 1)[0];
+                    state.images.splice(dragState.currentIndex, 0, item);
+                }
+                
+                // 重置状态
+                dragState.isDragging = false;
+                dragState.startIndex = -1;
+                dragState.currentIndex = -1;
+                dragState.activeBox = null;
+                els.canvas.style.cursor = 'grab';
+                drawPreview();
+            }
+        }
+
+        // 处理文件上传
+        function handleFiles(e) {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+
+            let loadedCount = 0;
+            const newImages = [];
+
+            files.forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        newImages.push(img);
+                        loadedCount++;
+                        if (loadedCount === files.length) {
+                            state.images = state.images.concat(newImages);
+                            updateUI();
+                        }
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            e.target.value = '';
+        }
+
+        // 清空图片
+        function clearImages() {
+            state.images = [];
+            updateUI();
+        }
+
+        // 更新UI状态
+        function updateUI() {
+            els.imageCount.textContent = `已加载 ${state.images.length} 张图片`;
+            if (state.images.length > 0) {
+                els.emptyState.classList.add('hidden');
+                els.canvas.classList.remove('hidden');
+                els.dragTip.classList.toggle('hidden', state.images.length <= 1);
+                drawPreview();
+            } else {
+                els.emptyState.classList.remove('hidden');
+                els.canvas.classList.add('hidden');
+                els.dragTip.classList.add('hidden');
+            }
+        }
+
+        // 核心渲染逻辑
+        function drawPreview() {
+            if (state.images.length === 0) return;
+
+            // 获取设置项
+            const layout = document.querySelector('input[name="layout"]:checked').value;
+            const wrapCount = parseInt(els.wrapCount.value) || 1;
+            const hAlign = els.hAlign.value;
+            const vAlign = els.vAlign.value;
+            const compact = els.compact.checked;
+            const spacing = parseInt(els.spacing.value) || 0;
+            const stretch = els.stretch.checked;
+            
+            const uniformSize = els.uniformSize.checked;
+            const uniformMode = els.uniformMode.value;
+            const uniformValue = parseInt(els.uniformValue.value) || 500;
+
+            const bgTransparent = els.bgTransparent.checked;
+            const bgColor = els.bgHex.value;
+            const resizeMode = els.resizeMode.value;
+            const resizeValue = parseInt(els.resizeValue.value) || 0;
+
+            // 预处理图片尺寸
+            const processedImages = state.images.map((img, i) => {
+                let w = img.width;
+                let h = img.height;
+                if (uniformSize) {
+                    if (uniformMode === 'width') {
+                        w = Math.max(1, uniformValue);
+                        h = Math.max(1, img.height * (w / img.width));
+                    } else {
+                        h = Math.max(1, uniformValue);
+                        w = Math.max(1, img.width * (h / img.height));
+                    }
+                }
+                return { raw: img, width: w, height: h, originalIndex: i };
+            });
+
+            const numImages = processedImages.length;
+            let cols = 1, rows = 1;
+            
+            if (layout === 'row') {
+                cols = Math.min(wrapCount, numImages);
+                rows = Math.ceil(numImages / cols);
+            } else {
+                rows = Math.min(wrapCount, numImages);
+                cols = Math.ceil(numImages / rows);
+            }
+
+            let rawCanvasW = 0, rawCanvasH = 0;
+            let rowData = [], colData = [];
+
+            // === 尺寸计算阶段 ===
+            if (compact) {
+                if (layout === 'row') {
+                    for (let i = 0; i < rows; i++) {
+                        const rowImgs = processedImages.slice(i * cols, (i + 1) * cols);
+                        const rowH = Math.max(...rowImgs.map(p => p.height));
+                        const rowW = rowImgs.reduce((sum, p) => sum + p.width, 0) + Math.max(0, rowImgs.length - 1) * spacing;
+                        rowData.push({ imgs: rowImgs, height: rowH, width: rowW });
+                    }
+                    rawCanvasW = Math.max(...rowData.map(r => r.width));
+                    rawCanvasH = rowData.reduce((sum, r) => sum + r.height, 0) + Math.max(0, rows - 1) * spacing;
+                } else {
+                    for (let c = 0; c < cols; c++) {
+                        const colImgs = [];
+                        for(let r = 0; r < rows; r++) {
+                            const imgIndex = r * cols + c;
+                            if (processedImages[imgIndex]) colImgs.push(processedImages[imgIndex]);
+                        }
+                        const colW = Math.max(...colImgs.map(p => p.width));
+                        const colH = colImgs.reduce((sum, p) => sum + p.height, 0) + Math.max(0, colImgs.length - 1) * spacing;
+                        colData.push({ imgs: colImgs, width: colW, height: colH });
+                    }
+                    rawCanvasW = colData.reduce((sum, c) => sum + c.width, 0) + Math.max(0, cols - 1) * spacing;
+                    rawCanvasH = Math.max(...colData.map(c => c.height));
+                }
+            } else {
+                let maxW = 0, maxH = 0;
+                processedImages.forEach(p => {
+                    if (p.width > maxW) maxW = p.width;
+                    if (p.height > maxH) maxH = p.height;
+                });
+                rawCanvasW = cols * maxW + (cols - 1) * spacing;
+                rawCanvasH = rows * maxH + (rows - 1) * spacing;
+                this.cellW = maxW;
+                this.cellH = maxH;
+            }
+
+            // === 缩放处理 ===
+            let scale = 1;
+            if (resizeMode === 'width' && resizeValue > 0) {
+                scale = resizeValue / rawCanvasW;
+            } else if (resizeMode === 'height' && resizeValue > 0) {
+                scale = resizeValue / rawCanvasH;
+            }
+
+            const finalCanvasW = Math.max(1, rawCanvasW * scale);
+            const finalCanvasH = Math.max(1, rawCanvasH * scale);
+            const actualSpacing = spacing * scale;
+
+            // === 设置 Canvas 并绘制背景 ===
+            els.canvas.width = finalCanvasW;
+            els.canvas.height = finalCanvasH;
+            
+            ctx.clearRect(0, 0, finalCanvasW, finalCanvasH);
+            if (!bgTransparent) {
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, finalCanvasW, finalCanvasH);
+            }
+
+            // 清空重新注册交互触发区
+            state.hitBoxes = [];
+
+            // 提取渲染单元和Hitbox注册的复用函数
+            function renderImageCell(pImg, finalX, finalY, finalW, finalH) {
+                const isDraggedItem = dragState.isDragging && pImg.originalIndex === dragState.startIndex;
+                
+                if (isDraggedItem) {
+                    ctx.globalAlpha = 0.3; // 被拖拽的原始位置变暗
+                }
+                
+                ctx.drawImage(pImg.raw, finalX, finalY, finalW, finalH);
+                ctx.globalAlpha = 1.0;
+
+                // 注册可交互区域
+                state.hitBoxes.push({
+                    index: pImg.originalIndex,
+                    x: finalX,
+                    y: finalY,
+                    w: finalW,
+                    h: finalH,
+                    img: pImg.raw
+                });
+
+                // 绘制拖放目标位置的红色高亮边框和蒙层
+                if (dragState.isDragging && pImg.originalIndex === dragState.currentIndex && !isDraggedItem) {
+                    ctx.strokeStyle = '#CB3A56'; // redAlert
+                    ctx.lineWidth = Math.max(3, 6 * scale);
+                    ctx.strokeRect(finalX, finalY, finalW, finalH);
+                    ctx.fillStyle = 'rgba(203, 58, 86, 0.25)';
+                    ctx.fillRect(finalX, finalY, finalW, finalH);
+                }
+            }
+
+            // === 绘制阶段 ===
+            if (compact) {
+                if (layout === 'row') {
+                    let currentY = 0;
+                    rowData.forEach(row => {
+                        const rowH = row.height * scale;
+                        const rowW = row.width * scale;
+                        let currentX = 0;
+                        if (hAlign === 'center') currentX = (finalCanvasW - rowW) / 2;
+                        else if (hAlign === 'right') currentX = finalCanvasW - rowW;
+
+                        row.imgs.forEach(pImg => {
+                            const imgW = pImg.width * scale;
+                            const imgH = pImg.height * scale;
+                            let offsetY = 0;
+                            if (vAlign === 'center') offsetY = (rowH - imgH) / 2;
+                            else if (vAlign === 'bottom') offsetY = rowH - imgH;
+
+                            renderImageCell(pImg, currentX, currentY + offsetY, imgW, imgH);
+                            currentX += imgW + actualSpacing;
+                        });
+                        currentY += rowH + actualSpacing;
+                    });
+                } else {
+                    let currentX = 0;
+                    colData.forEach(col => {
+                        const colW = col.width * scale;
+                        const colH = col.height * scale;
+                        let currentY = 0;
+                        if (vAlign === 'center') currentY = (finalCanvasH - colH) / 2;
+                        else if (vAlign === 'bottom') currentY = finalCanvasH - colH;
+
+                        col.imgs.forEach(pImg => {
+                            const imgW = pImg.width * scale;
+                            const imgH = pImg.height * scale;
+                            let offsetX = 0;
+                            if (hAlign === 'center') offsetX = (colW - imgW) / 2;
+                            else if (hAlign === 'right') offsetX = colW - imgW;
+
+                            renderImageCell(pImg, currentX + offsetX, currentY, imgW, imgH);
+                            currentY += imgH + actualSpacing;
+                        });
+                        currentX += colW + actualSpacing;
+                    });
+                }
+            } else {
+                const actualCellW = this.cellW * scale;
+                const actualCellH = this.cellH * scale;
+
+                processedImages.forEach((pImg, index) => {
+                    let col = layout === 'row' ? index % cols : Math.floor(index / rows);
+                    let row = layout === 'row' ? Math.floor(index / cols) : index % rows;
+
+                    const cellX = col * (actualCellW + actualSpacing);
+                    const cellY = row * (actualCellH + actualSpacing);
+
+                    if (stretch) {
+                        renderImageCell(pImg, cellX, cellY, actualCellW, actualCellH);
+                    } else {
+                        let drawW = pImg.width * scale;
+                        let drawH = pImg.height * scale;
+                        let offsetX = 0;
+                        let offsetY = 0;
+
+                        if (hAlign === 'center') offsetX = (actualCellW - drawW) / 2;
+                        else if (hAlign === 'right') offsetX = actualCellW - drawW;
+
+                        if (vAlign === 'center') offsetY = (actualCellH - drawH) / 2;
+                        else if (vAlign === 'bottom') offsetY = actualCellH - drawH;
+
+                        renderImageCell(pImg, cellX + offsetX, cellY + offsetY, drawW, drawH);
+                    }
+                });
+            }
+
+            // === 拖拽状态下：在最上层绘制跟随鼠标的悬浮缩略图 ===
+            if (dragState.isDragging && dragState.activeBox) {
+                const box = dragState.activeBox;
+                ctx.save();
+                // 增加投影以增强浮出效果
+                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                ctx.shadowBlur = 15;
+                ctx.shadowOffsetX = 5;
+                ctx.shadowOffsetY = 10;
+                
+                // 让拖拽图片居中在鼠标位置
+                ctx.drawImage(box.img, dragState.mouseX - box.w / 2, dragState.mouseY - box.h / 2, box.w, box.h);
+                
+                // 描边避免与原图融为一体
+                ctx.shadowColor = 'transparent';
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(dragState.mouseX - box.w / 2, dragState.mouseY - box.h / 2, box.w, box.h);
+                ctx.restore();
+            }
+        }
+
+        // 下载保存功能
+        function downloadCanvas() {
+            if (state.images.length === 0) {
+                alert('请先上传图片！');
+                return;
+            }
+            
+            // 确保渲染非拖拽时的纯净图像用于下载
+            const wasDragging = dragState.isDragging;
+            if (wasDragging) {
+                dragState.isDragging = false;
+                drawPreview();
+            }
+
+            const dataUrl = els.canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = `stitched_image_${new Date().getTime()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // 恢复交互状态
+            if (wasDragging) {
+                dragState.isDragging = true;
+                drawPreview();
+            }
+        }
+
+        // 初始化
+        initEvents();
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

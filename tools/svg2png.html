@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG 转 PNG 工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        theme: 'var(--accent-color)',
+                        bg: 'var(--bg-color)',
+                        redAlert: '#CB3A56',
+                        redDark: '#82111f',
+                        blueAlt: 'var(--header-text-color)',
+                        whiteAlt: 'var(--border-color)',
+                        blackAlt: 'var(--text-color)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 隐藏滚动条但保留功能 */
+        
+        
+        
+        
+        
+        /* 透明底色棋盘格伪类 */
+        .checkerboard {
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(45deg, #e5e5e5 25%, transparent 25%, transparent 75%, #e5e5e5 75%, #e5e5e5), 
+                linear-gradient(45deg, #e5e5e5 25%, transparent 25%, transparent 75%, #e5e5e5 75%, #e5e5e5);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+
+        /* 自定义单选框/复选框颜色 */
+        input[type="radio"]:checked, input[type="checkbox"]:checked {
+            accent-color: #815c94;
+        }
+    </style>
+    <style>
+        /* Clean Toolbar without backgrounds */
+        .clean-toolbar { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: flex-end; padding: 10px 20px; z-index: 50; }
+        .clean-controls { display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); padding: 6px 12px; border-radius: 30px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .tone-btn { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.2s, border-color 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 0; }
+        #mode-toggle { background: transparent; border: none; box-shadow: none; font-size: 1rem; padding: 2px; cursor: pointer; line-height: 1; display: flex; align-items: center; justify-content: center; }
+        #mode-toggle:hover { transform: scale(1.1); background: transparent; box-shadow: none; }
+        .glass-panel-inner { background: rgba(255, 255, 255, 0.2); border: 1px solid var(--border-color); }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col font-sans overflow-hidden text-blackAlt">
+    <!-- Top Right Toolbar -->
+    
+
+    <!-- Main App Window -->
+    
+    <!-- Global App Window Titlebar -->
+    <div class="window-titlebar" style="border-top: none; border-left: none; border-right: none;">
+        <div class="title-content">
+            <span class="window-icon" style="font-size:1rem; font-weight:800; font-family:monospace;">&lt; IMG &gt;</span>
+            <h2 class="window-title" style="font-size:1rem;">SVG 转 PNG</h2>
+        </div>
+        <div class="window-controls theme-controls">
+            <input type="range" min="-1" max="1" step="1" class="tone-slider" title="调整冷暖色调">
+            <div class="mode-square-btn" title="切换深浅色">昼</div>
+            <div class="mode-square-btn" style="background:var(--accent-color); color:#fff; border-color:var(--accent-color);" onclick="window.location.href='../index.html'" title="返回首页">⚪</div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 p-4 md:p-6 flex flex-col gap-4 overflow-hidden">
+
+                <!-- Inner content wrapper -->
+                <div class="w-full flex flex-col gap-4">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-theme mb-2">SVG 转 PNG</h1>
+            <p class="text-blueAlt text-sm">本地转换工具，请根据设备性能量力而行……</p>
+        </div>
+
+        <!-- 上传区域 -->
+        <div id="drop-zone" class="border-2 border-dashed border-blueAlt glass-card ">
+            <svg class="w-12 h-12 mx-auto mb-4 text-blueAlt group-hover:text-theme transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            <p class="text-blackAlt font-medium mb-1">点击选择 或 拖拽 SVG 文件至此</p>
+            <p class="text-blueAlt text-xs">仅支持 .svg 格式</p>
+            <input type="file" id="file-input" accept=".svg" class="hidden">
+        </div>
+
+        <!-- 错误提示 -->
+        <div id="error-msg" class="hidden mt-4 p-3 bg-redAlert/10 border border-redAlert text-redAlert  text-sm text-center font-medium"></div>
+
+        <!-- 操作与设置区域 (初始隐藏) -->
+        <div id="settings-area" class="mt-8 space-y-6 hidden animate-fade-in-up">
+            
+            <!-- 尺寸设置 -->
+            <div class="bg-white/50  p-4 border border-bg/30">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-theme">输出尺寸 (px)</h3>
+                    <label class="flex items-center text-sm text-blueAlt cursor-pointer hover:text-theme">
+                        <input type="checkbox" id="keep-ratio" checked class="mr-2 w-4 h-4 cursor-pointer">
+                        保持宽高比
+                    </label>
+                </div>
+                <div class="flex gap-4 items-center">
+                    <div class="flex-1">
+                        <label class="block text-xs text-blueAlt mb-1">宽度</label>
+                        <input type="number" id="width-input" class="w-full border border-bg  p-2.5 text-blackAlt focus:outline-none focus:ring-2 focus:ring-theme focus:border-theme bg-white font-mono transition-shadow">
+                    </div>
+                    <div class="text-bg font-bold mt-5">×</div>
+                    <div class="flex-1">
+                        <label class="block text-xs text-blueAlt mb-1">高度</label>
+                        <input type="number" id="height-input" class="w-full border border-bg  p-2.5 text-blackAlt focus:outline-none focus:ring-2 focus:ring-theme focus:border-theme bg-white font-mono transition-shadow">
+                    </div>
+                    <button id="reset-size-btn" class="mt-5 text-blueAlt hover:text-redDark transition-colors p-2  hover:bg-redDark/10" title="重置为原尺寸">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 底色与模式设置 -->
+            <div class="bg-white/50  p-4 border border-bg/30">
+                <h3 class="font-bold text-theme mb-3">背景与通道处理</h3>
+                <div class="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                    <label class="flex items-center gap-2 cursor-pointer text-blackAlt hover:text-theme transition-colors">
+                        <input type="radio" name="bg-mode" value="transparent" checked class="w-4 h-4 cursor-pointer"> 
+                        <span>保留透明通道</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer text-blackAlt hover:text-theme transition-colors">
+                        <input type="radio" name="bg-mode" value="custom" class="w-4 h-4 cursor-pointer"> 
+                        <span>自定义底色</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer text-blackAlt hover:text-theme transition-colors" title="基于透明度生成黑白蒙版图">
+                        <input type="radio" name="bg-mode" value="mask" class="w-4 h-4 cursor-pointer"> 
+                        <span>导出蒙版 (Alpha)</span>
+                    </label>
+                </div>
+
+                <!-- 自定义颜色选择器 (隐藏/显示) -->
+                <div id="custom-color-container" class="mt-4 hidden animate-fade-in-up">
+                    <div class="flex items-center gap-3">
+                        <label class="text-sm text-blueAlt">选择颜色:</label>
+                        <input type="color" id="custom-color-input" value="#815c94" class="w-10 h-10  cursor-pointer border-0 p-0 bg-transparent">
+                        <span id="color-hex-display" class="text-sm font-mono text-blackAlt uppercase">#815C94</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 预览区域 -->
+            <div>
+                <h3 class="font-bold text-theme mb-2 text-sm">图像预览</h3>
+                <div id="preview-container" class="border border-bg  checkerboard flex items-center justify-center overflow-hidden h-48 sm:h-64 relative group">
+                    <img id="preview-img" class="max-w-full max-h-full object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-105">
+                </div>
+            </div>
+
+            <!-- 转换按钮 -->
+            <button id="convert-btn" class="w-full bg-theme text-whiteAlt font-bold py-3.5  hover:bg-blackAlt active:scale-[0.98] transition-all shadow-lg flex items-center justify-center gap-2 text-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                转换并下载 PNG
+            </button>
+        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // DOM 元素引用
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const errorMsg = document.getElementById('error-msg');
+        const settingsArea = document.getElementById('settings-area');
+        const widthInput = document.getElementById('width-input');
+        const heightInput = document.getElementById('height-input');
+        const keepRatioCheckbox = document.getElementById('keep-ratio');
+        const resetSizeBtn = document.getElementById('reset-size-btn');
+        const bgRadios = document.querySelectorAll('input[name="bg-mode"]');
+        const customColorContainer = document.getElementById('custom-color-container');
+        const customColorInput = document.getElementById('custom-color-input');
+        const colorHexDisplay = document.getElementById('color-hex-display');
+        const previewImg = document.getElementById('preview-img');
+        const previewContainer = document.getElementById('preview-container');
+        const convertBtn = document.getElementById('convert-btn');
+
+        // 全局状态
+        let originalSvgDoc = null;
+        let originalWidth = 800;
+        let originalHeight = 800;
+        let currentAspectRatio = 1;
+
+        // --- 交互逻辑: 文件拖拽与选择 ---
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-theme', 'bg-bg/20');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-theme', 'bg-bg/20');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-theme', 'bg-bg/20');
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+            fileInput.value = ''; // Reset
+        });
+
+        // --- 错误提示处理 ---
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.classList.remove('hidden');
+            setTimeout(() => { errorMsg.classList.add('hidden'); }, 4000);
+        }
+
+        // --- 读取与解析 SVG ---
+        function handleFile(file) {
+            if (file.type !== 'image/svg+xml' && !file.name.toLowerCase().endsWith('.svg')) {
+                showError('格式不支持，请上传标准的 .svg 文件。');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parser = new DOMParser();
+                    originalSvgDoc = parser.parseFromString(e.target.result, "image/svg+xml");
+                    
+                    // 检查是否解析为有效的SVG
+                    if (originalSvgDoc.documentElement.nodeName !== 'svg') {
+                        throw new Error("无效的SVG内容");
+                    }
+                    
+                    extractDimensionsAndSetup();
+                } catch (err) {
+                    showError('SVG 解析失败，文件可能已损坏。');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- 提取尺寸信息并初始化设置界面 ---
+        function extractDimensionsAndSetup() {
+            const svgEl = originalSvgDoc.documentElement;
+            
+            let wAttr = svgEl.getAttribute('width');
+            let hAttr = svgEl.getAttribute('height');
+            let vBox = svgEl.getAttribute('viewBox');
+
+            // 尝试获取数值像素
+            let w = parseFloat(wAttr);
+            let h = parseFloat(hAttr);
+
+            if ((isNaN(w) || isNaN(h)) && vBox) {
+                const parts = vBox.split(/\s+|,/);
+                if (parts.length >= 4) {
+                    w = parseFloat(parts[2]);
+                    h = parseFloat(parts[3]);
+                }
+            }
+
+            // Fallback 默认值
+            w = (isNaN(w) || w <= 0) ? 800 : w;
+            h = (isNaN(h) || h <= 0) ? 800 : h;
+
+            originalWidth = Math.round(w);
+            originalHeight = Math.round(h);
+            currentAspectRatio = originalWidth / originalHeight;
+
+            // 如果没有viewBox，为其补充以确保缩放正常
+            if (!vBox) {
+                svgEl.setAttribute('viewBox', `0 0 ${originalWidth} ${originalHeight}`);
+            }
+
+            // 更新 UI
+            widthInput.value = originalWidth;
+            heightInput.value = originalHeight;
+            
+            updatePreview();
+            
+            // 展现设置面板
+            settingsArea.classList.remove('hidden');
+            dropZone.classList.add('border-solid', 'border-bg/50', 'p-6');
+            dropZone.querySelector('p:first-of-type').textContent = "重新选择 SVG 文件";
+        }
+
+        // --- 宽高联动逻辑 ---
+        widthInput.addEventListener('input', () => {
+            if (keepRatioCheckbox.checked && widthInput.value > 0) {
+                heightInput.value = Math.round(widthInput.value / currentAspectRatio);
+            }
+        });
+        heightInput.addEventListener('input', () => {
+            if (keepRatioCheckbox.checked && heightInput.value > 0) {
+                widthInput.value = Math.round(heightInput.value * currentAspectRatio);
+            }
+        });
+        resetSizeBtn.addEventListener('click', () => {
+            widthInput.value = originalWidth;
+            heightInput.value = originalHeight;
+        });
+
+        // --- 底色模式交互 ---
+        bgRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'custom') {
+                    customColorContainer.classList.remove('hidden');
+                    previewContainer.style.backgroundColor = customColorInput.value;
+                    previewContainer.classList.remove('checkerboard');
+                } else {
+                    customColorContainer.classList.add('hidden');
+                    if (e.target.value === 'mask') {
+                        previewContainer.style.backgroundColor = '#000000'; // 蒙版预览底色为黑
+                        previewContainer.classList.remove('checkerboard');
+                    } else {
+                        previewContainer.style.backgroundColor = '';
+                        previewContainer.classList.add('checkerboard');
+                    }
+                }
+            });
+        });
+
+        customColorInput.addEventListener('input', (e) => {
+            colorHexDisplay.textContent = e.target.value.toUpperCase();
+            if (document.querySelector('input[name="bg-mode"]:checked').value === 'custom') {
+                previewContainer.style.backgroundColor = e.target.value;
+            }
+        });
+
+        // --- 更新缩略图预览 ---
+        function updatePreview() {
+            const serializer = new XMLSerializer();
+            const svgStr = serializer.serializeToString(originalSvgDoc);
+            const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            // 清理旧ObjectURL
+            if (previewImg.src && previewImg.src.startsWith('blob:')) {
+                URL.revokeObjectURL(previewImg.src);
+            }
+            
+            previewImg.src = url;
+        }
+
+        // --- 核心：渲染与下载 ---
+        convertBtn.addEventListener('click', () => {
+            const w = parseInt(widthInput.value);
+            const h = parseInt(heightInput.value);
+            const mode = document.querySelector('input[name="bg-mode"]:checked').value;
+
+            if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0 || w > 10000 || h > 10000) {
+                showError('请输入有效的尺寸（1 ~ 10000px）。');
+                return;
+            }
+
+            // 1. 克隆并修改 SVG 尺寸以确保高清渲染
+            const svgClone = originalSvgDoc.cloneNode(true);
+            svgClone.documentElement.setAttribute('width', `${w}px`);
+            svgClone.documentElement.setAttribute('height', `${h}px`);
+            
+            const serializer = new XMLSerializer();
+            const svgStr = serializer.serializeToString(svgClone);
+            
+            // 2. 准备 Canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+
+            // 3. 处理底色
+            if (mode === 'custom') {
+                ctx.fillStyle = customColorInput.value;
+                ctx.fillRect(0, 0, w, h);
+            } else if (mode === 'mask') {
+                // 蒙版模式初始背景为纯黑，代表完全透明
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, w, h);
+            }
+
+            // 4. 将 SVG 画到 Canvas 上
+            const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            
+            // 按钮防抖与状态改变
+            const originalBtnText = convertBtn.innerHTML;
+            convertBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 处理中...';
+            convertBtn.disabled = true;
+
+            img.onload = () => {
+                
+                if (mode === 'mask') {
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = w;
+                    tempCanvas.height = h;
+                    const tCtx = tempCanvas.getContext('2d');
+                    tCtx.drawImage(img, 0, 0, w, h);
+                    
+                    const imgData = tCtx.getImageData(0, 0, w, h);
+                    const data = imgData.data;
+                    
+                    for (let i = 0; i < data.length; i += 4) {
+                        const alpha = data[i + 3];
+                        // R, G, B 全部设为跟 Alpha 相同的值，从而获得标准的 Alpha 蒙版 (灰度)
+                        data[i]     = alpha;
+                        data[i + 1] = alpha;
+                        data[i + 2] = alpha;
+                        data[i + 3] = 255; // 设置为不透明
+                    }
+                    ctx.putImageData(imgData, 0, 0);
+                } else {
+                    ctx.drawImage(img, 0, 0, w, h);
+                }
+
+                // 5. 触发下载
+                try {
+                    const pngUrl = canvas.toDataURL('image/png');
+                    const a = document.createElement('a');
+                    a.download = 'converted_image.png';
+                    a.href = pngUrl;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } catch(e) {
+                    showError('导出失败，可能是 SVG 中包含了跨域的外部资源。');
+                } finally {
+                    // 恢复状态
+                    URL.revokeObjectURL(url);
+                    convertBtn.innerHTML = originalBtnText;
+                    convertBtn.disabled = false;
+                }
+            };
+            
+            img.onerror = () => {
+                showError('图片渲染失败，SVG 可能存在不支持的标签或跨域图片。');
+                URL.revokeObjectURL(url);
+                convertBtn.innerHTML = originalBtnText;
+                convertBtn.disabled = false;
+            };
+
+            img.src = url;
+        });
+
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

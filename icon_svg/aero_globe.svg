@@ -1,0 +1,25 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="globeGrad" cx="30%" cy="30%" r="70%" fx="30%" fy="30%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+      <stop offset="30%" stop-color="#88ccff" stop-opacity="0.7" />
+      <stop offset="80%" stop-color="#0055ff" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#002288" stop-opacity="1" />
+    </radialGradient>
+    <linearGradient id="gloss" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="40%" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="40.1%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="grid" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="90" fill="url(#globeGrad)" />
+  <path d="M 10 100 A 90 90 0 0 1 190 100 A 90 30 0 0 0 10 100" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.5"/>
+  <path d="M 100 10 A 90 90 0 0 1 100 190 A 30 90 0 0 0 100 10" fill="none" stroke="#ffffff" stroke-width="2" stroke-opacity="0.5"/>
+  <circle cx="100" cy="100" r="90" fill="url(#grid)" />
+  <ellipse cx="100" cy="55" rx="70" ry="35" fill="url(#gloss)" />
+</svg>
