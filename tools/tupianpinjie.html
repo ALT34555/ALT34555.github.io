@@ -184,8 +184,27 @@
                     </div>
                 </div>
 
-                <div class="flex justify-center items-start min-h-full pb-10">
-                    <canvas id="previewCanvas" class="max-w-full shadow-2xl hidden transition-all duration-75" style="background-color: transparent;"></canvas>
+                <!-- 预览视口（支持缩放与平移） -->
+                <div id="previewViewport" class="flex-1 relative overflow-hidden">
+                    <div id="canvasWrapper" class="absolute top-0 left-0 origin-top-left">
+                        <canvas id="previewCanvas" class="shadow-2xl hidden" style="background-color: transparent;"></canvas>
+                    </div>
+                </div>
+
+                <!-- 导航窗口（缩略图） -->
+                <div id="minimapContainer" class="hidden absolute top-3 right-3 z-20 bg-white/70 backdrop-blur-sm border border-bg shadow-md p-1">
+                    <div class="relative">
+                        <canvas id="minimap" class="block"></canvas>
+                        <div id="minimapViewport" class="absolute top-0 left-0 border-2 border-theme pointer-events-none"></div>
+                    </div>
+                </div>
+
+                <!-- 缩放控制 -->
+                <div id="zoomControls" class="hidden absolute bottom-3 right-3 z-20 items-center gap-0.5 bg-white/80 backdrop-blur-sm border border-bg shadow-md px-1 py-1 rounded">
+                    <button id="zoomOutBtn" class="w-8 h-8 text-lg font-bold hover:bg-theme hover:text-whiteAlt transition-colors rounded" title="缩小">−</button>
+                    <span id="zoomLevel" class="text-xs font-semibold px-1 text-center select-none" style="min-width: 3rem;">100%</span>
+                    <button id="zoomInBtn" class="w-8 h-8 text-lg font-bold hover:bg-theme hover:text-whiteAlt transition-colors rounded" title="放大">+</button>
+                    <button id="zoomFitBtn" class="h-8 px-2 text-xs font-semibold hover:bg-theme hover:text-whiteAlt transition-colors rounded" title="适应窗口">适应</button>
                 </div>
             </main>
         </div>
@@ -235,10 +254,168 @@
             canvas: document.getElementById('previewCanvas'),
             emptyState: document.getElementById('emptyState'),
             dragTip: document.getElementById('dragTip'),
-            bgColorContainer: document.getElementById('bgColorContainer')
+            bgColorContainer: document.getElementById('bgColorContainer'),
+            previewViewport: document.getElementById('previewViewport'),
+            canvasWrapper: document.getElementById('canvasWrapper'),
+            minimapContainer: document.getElementById('minimapContainer'),
+            minimap: document.getElementById('minimap'),
+            minimapViewport: document.getElementById('minimapViewport'),
+            zoomControls: document.getElementById('zoomControls'),
+            zoomInBtn: document.getElementById('zoomInBtn'),
+            zoomOutBtn: document.getElementById('zoomOutBtn'),
+            zoomFitBtn: document.getElementById('zoomFitBtn'),
+            zoomLevel: document.getElementById('zoomLevel')
         };
 
         const ctx = els.canvas.getContext('2d');
+
+        // 视图缩放与平移状态
+        const view = { zoom: 1, panX: 0, panY: 0 };
+        const MIN_ZOOM = 0.05, MAX_ZOOM = 8;
+        const panState = { isPanning: false, startX: 0, startY: 0, origPanX: 0, origPanY: 0 };
+        const minimapDrag = { active: false };
+
+        // 平移边界约束，防止图片被拖出视野
+        function clampPan() {
+            const cw = els.canvas.width * view.zoom;
+            const ch = els.canvas.height * view.zoom;
+            const vw = els.previewViewport.clientWidth;
+            const vh = els.previewViewport.clientHeight;
+            if (!vw || !vh) return;
+            const M = 60;
+            if (cw <= vw) view.panX = (vw - cw) / 2;
+            else view.panX = Math.min(M, Math.max(vw - cw - M, view.panX));
+            if (ch <= vh) view.panY = (vh - ch) / 2;
+            else view.panY = Math.min(M, Math.max(vh - ch - M, view.panY));
+        }
+
+        function applyTransform() {
+            els.canvasWrapper.style.transform = `translate(${view.panX}px, ${view.panY}px) scale(${view.zoom})`;
+            els.zoomLevel.textContent = Math.round(view.zoom * 100) + '%';
+        }
+
+        function zoomAt(clientX, clientY, factor) {
+            const rect = els.previewViewport.getBoundingClientRect();
+            const mx = clientX - rect.left;
+            const my = clientY - rect.top;
+            const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, view.zoom * factor));
+            if (newZoom === view.zoom) return;
+            const ratio = newZoom / view.zoom;
+            view.panX = mx - (mx - view.panX) * ratio;
+            view.panY = my - (my - view.panY) * ratio;
+            view.zoom = newZoom;
+            clampPan();
+            applyTransform();
+            updateMinimap();
+        }
+
+        function zoomIn() {
+            const rect = els.previewViewport.getBoundingClientRect();
+            zoomAt(rect.left + rect.width / 2, rect.top + rect.height / 2, 1.2);
+        }
+
+        function zoomOut() {
+            const rect = els.previewViewport.getBoundingClientRect();
+            zoomAt(rect.left + rect.width / 2, rect.top + rect.height / 2, 1 / 1.2);
+        }
+
+        function fitToView() {
+            const cw = els.canvas.width;
+            const ch = els.canvas.height;
+            const vw = els.previewViewport.clientWidth;
+            const vh = els.previewViewport.clientHeight;
+            if (!cw || !ch || !vw || !vh) return;
+            view.zoom = Math.min(vw / cw, vh / ch, 1);
+            view.panX = (vw - cw * view.zoom) / 2;
+            view.panY = (vh - ch * view.zoom) / 2;
+            applyTransform();
+            updateMinimap();
+        }
+
+        function handleWheel(e) {
+            if (state.images.length === 0) return;
+            e.preventDefault();
+            const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+            zoomAt(e.clientX, e.clientY, factor);
+        }
+
+        function handleKeyDown(e) {
+            if (state.images.length === 0) return;
+            const el = document.activeElement;
+            if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA' || el.tagName === 'BUTTON')) return;
+            const STEP = 50;
+            let handled = true;
+            switch (e.key) {
+                case 'ArrowUp': view.panY += STEP; break;
+                case 'ArrowDown': view.panY -= STEP; break;
+                case 'ArrowLeft': view.panX += STEP; break;
+                case 'ArrowRight': view.panX -= STEP; break;
+                case '+': case '=': zoomIn(); return;
+                case '-': case '_': zoomOut(); return;
+                case '0': fitToView(); return;
+                default: handled = false;
+            }
+            if (!handled) return;
+            e.preventDefault();
+            clampPan();
+            applyTransform();
+            updateMinimap();
+        }
+
+        function minimapNavigate(e) {
+            if (state.images.length === 0) return;
+            const rect = els.minimap.getBoundingClientRect();
+            if (!els.minimap.width || !els.canvas.width) return;
+            const pxPerCss = els.minimap.width / rect.width;
+            const mx = (e.clientX - rect.left) * pxPerCss;
+            const my = (e.clientY - rect.top) * pxPerCss;
+            const scale = els.minimap.width / els.canvas.width;
+            const cx = mx / scale;
+            const cy = my / scale;
+            const vw = els.previewViewport.clientWidth;
+            const vh = els.previewViewport.clientHeight;
+            view.panX = vw / 2 - cx * view.zoom;
+            view.panY = vh / 2 - cy * view.zoom;
+            clampPan();
+            applyTransform();
+            updateMinimap();
+        }
+
+        function updateMinimap() {
+            const cw = els.canvas.width;
+            const ch = els.canvas.height;
+            const MAX = 160;
+            if (!cw || !ch) {
+                els.minimapContainer.style.display = 'none';
+                return;
+            }
+            els.minimapContainer.style.display = 'block';
+            const scale = Math.min(MAX / cw, MAX / ch);
+            const mmW = Math.max(1, Math.round(cw * scale));
+            const mmH = Math.max(1, Math.round(ch * scale));
+            els.minimap.width = mmW;
+            els.minimap.height = mmH;
+            const mctx = els.minimap.getContext('2d');
+            mctx.clearRect(0, 0, mmW, mmH);
+            mctx.drawImage(els.canvas, 0, 0, mmW, mmH);
+
+            const vw = els.previewViewport.clientWidth;
+            const vh = els.previewViewport.clientHeight;
+            let vx = -view.panX / view.zoom;
+            let vy = -view.panY / view.zoom;
+            const vwC = vw / view.zoom;
+            const vhC = vh / view.zoom;
+            const right = Math.min(cw, vx + vwC);
+            const bottom = Math.min(ch, vy + vhC);
+            vx = Math.max(0, Math.min(cw, vx));
+            vy = Math.max(0, Math.min(ch, vy));
+            const rw = Math.max(1, (right - vx) * scale);
+            const rh = Math.max(1, (bottom - vy) * scale);
+            els.minimapViewport.style.left = (vx * scale) + 'px';
+            els.minimapViewport.style.top = (vy * scale) + 'px';
+            els.minimapViewport.style.width = rw + 'px';
+            els.minimapViewport.style.height = rh + 'px';
+        }
 
         // 事件监听设置
         function initEvents() {
@@ -316,11 +493,24 @@
                 els.stretch.disabled = true;
             }
 
-            // === 绑定 Canvas 拖拽事件 ===
-            els.canvas.addEventListener('mousedown', handleMouseDown);
-            els.canvas.addEventListener('mousemove', handleMouseMove);
+            // === 绑定拖拽 / 平移事件 ===
+            els.previewViewport.addEventListener('mousedown', handleMouseDown);
+            window.addEventListener('mousemove', handleMouseMove);
             window.addEventListener('mouseup', handleMouseUp);
-            els.canvas.addEventListener('mouseleave', handleMouseLeave);
+            els.previewViewport.addEventListener('mouseleave', handleMouseLeave);
+
+            // === 缩放与平移（鼠标滚轮 / 方向键 / 按钮） ===
+            els.previewViewport.addEventListener('wheel', handleWheel, { passive: false });
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('resize', () => { if (state.images.length > 0) updateMinimap(); });
+            els.zoomInBtn.addEventListener('click', (e) => { zoomIn(); e.currentTarget.blur(); });
+            els.zoomOutBtn.addEventListener('click', (e) => { zoomOut(); e.currentTarget.blur(); });
+            els.zoomFitBtn.addEventListener('click', (e) => { fitToView(); e.currentTarget.blur(); });
+
+            // === 导航窗口交互 ===
+            els.minimap.addEventListener('mousedown', (e) => { minimapDrag.active = true; minimapNavigate(e); });
+            window.addEventListener('mousemove', (e) => { if (minimapDrag.active) minimapNavigate(e); });
+            window.addEventListener('mouseup', () => { minimapDrag.active = false; });
         }
 
         // 获取鼠标在 Canvas 内部的真实坐标 (应对 CSS 缩放)
@@ -335,11 +525,11 @@
         }
 
         function handleMouseDown(e) {
-            if (state.images.length <= 1) return;
+            if (state.images.length === 0) return;
             const pos = getMousePos(els.canvas, e);
             const hit = state.hitBoxes.find(b => pos.x >= b.x && pos.x <= b.x + b.w && pos.y >= b.y && pos.y <= b.y + b.h);
             
-            if (hit) {
+            if (hit && state.images.length > 1) {
                 dragState.isDragging = true;
                 dragState.startIndex = hit.index;
                 dragState.currentIndex = hit.index;
@@ -348,23 +538,37 @@
                 dragState.mouseY = pos.y;
                 els.canvas.style.cursor = 'grabbing';
                 drawPreview();
+            } else {
+                // 在空白处按下时进入平移模式
+                panState.isPanning = true;
+                panState.startX = e.clientX;
+                panState.startY = e.clientY;
+                panState.origPanX = view.panX;
+                panState.origPanY = view.panY;
+                els.previewViewport.style.cursor = 'grabbing';
             }
         }
 
         function handleMouseMove(e) {
             if (state.images.length === 0) return;
-            const pos = getMousePos(els.canvas, e);
 
             if (dragState.isDragging) {
+                const pos = getMousePos(els.canvas, e);
                 dragState.mouseX = pos.x;
                 dragState.mouseY = pos.y;
                 const hit = state.hitBoxes.find(b => pos.x >= b.x && pos.x <= b.x + b.w && pos.y >= b.y && pos.y <= b.y + b.h);
                 dragState.currentIndex = hit ? hit.index : -1;
                 drawPreview(); // 刷新绘制以显示拖动轨迹和悬浮效果
+            } else if (panState.isPanning) {
+                view.panX = panState.origPanX + (e.clientX - panState.startX);
+                view.panY = panState.origPanY + (e.clientY - panState.startY);
+                clampPan();
+                applyTransform();
+                updateMinimap();
             } else {
-                // 仅悬停时改变指针样式
-                const hit = state.hitBoxes.find(b => pos.x >= b.x && pos.x <= b.x + b.w && pos.y >= b.y && pos.y <= b.y + b.h);
-                els.canvas.style.cursor = hit ? 'grab' : 'default';
+                // 悬停时改变指针样式
+                els.canvas.style.cursor = 'grab';
+                els.previewViewport.style.cursor = 'grab';
             }
         }
 
@@ -390,6 +594,10 @@
                 dragState.activeBox = null;
                 els.canvas.style.cursor = 'grab';
                 drawPreview();
+            }
+            if (panState.isPanning) {
+                panState.isPanning = false;
+                els.previewViewport.style.cursor = 'grab';
             }
         }
 
@@ -436,11 +644,18 @@
                 els.emptyState.classList.add('hidden');
                 els.canvas.classList.remove('hidden');
                 els.dragTip.classList.toggle('hidden', state.images.length <= 1);
+                els.minimapContainer.style.display = 'block';
+                els.zoomControls.style.display = 'flex';
                 drawPreview();
+                fitToView();
             } else {
                 els.emptyState.classList.remove('hidden');
                 els.canvas.classList.add('hidden');
                 els.dragTip.classList.add('hidden');
+                els.minimapContainer.style.display = 'none';
+                els.zoomControls.style.display = 'none';
+                els.canvas.style.cursor = '';
+                els.previewViewport.style.cursor = '';
             }
         }
 
@@ -684,6 +899,8 @@
                 ctx.strokeRect(dragState.mouseX - box.w / 2, dragState.mouseY - box.h / 2, box.w, box.h);
                 ctx.restore();
             }
+
+            updateMinimap();
         }
 
         // 下载保存功能
