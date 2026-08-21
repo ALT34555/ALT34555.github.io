@@ -25,7 +25,7 @@
         }
     </style>
 </head>
-<body class="h-screen flex flex-col font-sans overflow-hidden text-blackAlt">
+<body class="h-screen flex flex-col font-sans overflow-y-auto md:overflow-hidden text-blackAlt">
     <!-- Global App Window Titlebar -->
     <div class="window-titlebar" style="border-top: none; border-left: none; border-right: none;">
         <div class="title-content">
@@ -40,8 +40,8 @@
     </div>
 
     <!-- Main Content Area -->
-    <div class="flex-1 p-4 md:p-6 flex flex-col gap-4 overflow-hidden">
-        <div class="w-full h-full flex flex-col md:flex-row gap-4 overflow-hidden">
+    <div class="flex-1 p-4 md:p-6 flex flex-col gap-4 overflow-y-auto md:overflow-hidden">
+        <div class="w-full md:h-full flex flex-col md:flex-row gap-4 md:overflow-hidden">
             <aside class="w-full md:w-80 flex-shrink-0 flex flex-col glass-card  overflow-y-auto">
                 <div class="p-6 flex-grow space-y-6">
                     <!-- 文件上传 -->
@@ -171,7 +171,7 @@
                 </div>
             </aside>
 
-            <main class="flex-1 flex flex-col glass-card  checkerboard relative overflow-hidden">
+            <main class="flex-1 min-h-[60vh] md:min-h-0 flex flex-col glass-card  checkerboard relative overflow-hidden">
                 <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-blueAlt pointer-events-none opacity-50">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                     <p class="text-xl font-bold">请在左侧上传图片进行拼接</p>

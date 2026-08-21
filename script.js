@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         100% { transform: scale(0) translate(var(--tx), var(--ty)); opacity: 0; }
     }
     .sparkle {
-        position: absolute; pointer-events: none; border-radius: 50%;
+        position: absolute; pointer-events: none; border-radius: 0;
         animation: sparkle-anim 0.8s forwards; opacity: 0; z-index: 9999;
     }
   `;

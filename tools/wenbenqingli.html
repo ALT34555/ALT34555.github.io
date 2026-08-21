@@ -24,9 +24,13 @@
             border-color: var(--accent-color);
             box-shadow: 0 0 0 3px rgba(129, 92, 148, 0.3);
         }
+        /* 覆盖 .glass-card 的 overflow:hidden，恢复文本框内部滚动 */
+        textarea.glass-card {
+            overflow-y: auto;
+        }
     </style>
 </head>
-<body class="h-screen flex flex-col font-sans overflow-hidden text-blackAlt">
+<body class="h-screen flex flex-col font-sans overflow-y-auto md:overflow-hidden text-blackAlt">
     <!-- Global App Window Titlebar -->
     <div class="window-titlebar" style="border-top: none; border-left: none; border-right: none;">
         <div class="title-content">
@@ -41,7 +45,7 @@
     </div>
 
     <!-- Main Content Area -->
-    <div class="flex-1 p-4 md:p-6 flex flex-col gap-4 overflow-hidden">
+    <div class="flex-1 p-4 md:p-6 flex flex-col gap-4 overflow-y-auto md:overflow-hidden">
         
             
             <!-- 清理选项面板 -->
