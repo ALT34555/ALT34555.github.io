@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>配色设计</title>
+    <title>配色设计 · 中国传统色</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../style.css">
     <script>
@@ -26,17 +26,26 @@
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
             cursor: pointer;
+            transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
         }
         .color-cell:hover,
         .color-cell:active {
             background: transparent;
             border-color: var(--text-color);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            z-index: 2;
         }
-        .color-cell .sw { height: 2.4rem; }
+        .color-cell .sw {
+            height: 2.2rem;
+            width: 100%;
+            transition: opacity 0.15s ease;
+        }
+        .color-cell:hover .sw {
+            opacity: 0.95;
+        }
         .color-cell .nm {
             font-size: 0.62rem;
-            padding: 0.2rem 0.15rem;
+            padding: 0.2rem 0.1rem;
             text-align: center;
             color: var(--text-color);
             white-space: nowrap;
@@ -46,32 +55,83 @@
         }
         .color-cell.active {
             border: 2px solid var(--text-color);
-            box-shadow: 0 0 10px rgba(0,0,0,0.35);
-            padding: 0;
+            box-shadow: 0 0 12px rgba(0,0,0,0.35);
+            transform: scale(1.03);
+            z-index: 5;
         }
         .palette-swatch {
             border: 1px solid var(--border-color);
-            padding: 0.5rem 0.25rem;
+            padding: 0.45rem 0.25rem;
             cursor: pointer;
             font-family: monospace;
             font-size: 0.7rem;
             font-weight: 600;
             text-align: center;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 0.2rem;
-            min-height: 3.2rem;
+            min-height: 3.4rem;
             justify-content: center;
             background: transparent;
             backdrop-filter: none;
             -webkit-backdrop-filter: none;
             box-shadow: none;
+            position: relative;
         }
         .palette-swatch:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+            border-color: var(--text-color);
+        }
+        .cat-btn {
+            padding: 0.3rem 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .cat-btn:hover {
+            border-color: var(--text-color);
+            transform: translateY(-1px);
+        }
+        .cat-btn.active {
+            background: var(--text-color);
+            color: var(--bg-color);
+            border-color: var(--text-color);
+        }
+        .val-badge {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .val-badge:hover {
+            transform: translateY(-1px);
+            border-color: var(--text-color);
+            background: rgba(255, 255, 255, 0.35);
+        }
+        .action-chip {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.22);
+            color: inherit;
+            transition: all 0.15s ease;
+        }
+        .action-chip:hover {
+            border-color: var(--text-color);
+            background: rgba(255, 255, 255, 0.42);
+            transform: translateY(-1px);
         }
     </style>
 </head>
@@ -80,7 +140,7 @@
     <div class="window-titlebar" style="border-top: none; border-left: none; border-right: none;">
         <div class="title-content">
             <span class="window-icon" style="font-size:1rem; font-weight:800; font-family:monospace;">[ # ]</span>
-            <h2 class="window-title" style="font-size:1rem;">配色设计</h2>
+            <h2 class="window-title" style="font-size:1rem;">配色设计 · 中国传统色</h2>
         </div>
         <div class="window-controls">
             <div class="mode-square-btn" style="background:var(--text-color); color:var(--bg-color); border-color:var(--border-color);" onclick="window.location.href='../index.html'" title="返回首页">⚪</div>
@@ -92,603 +152,885 @@
         <!-- Top: main color + schemes -->
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
             <!-- 主色预览 -->
-            <div class="lg:col-span-2 glass-card">
-                <div id="mainCard" class="flex-1 flex flex-col items-center justify-center p-8 min-h-[260px] cursor-pointer select-none" onclick="copyHex(window.__currentHex)" title="点击复制色值">
-                    <div id="mainName" class="text-4xl font-bold mb-1 leading-tight"></div>
-                    <div id="mainPinyin" class="text-sm opacity-70 mb-3 font-mono"></div>
-                    <div id="mainHex" class="text-2xl font-mono tracking-widest uppercase"></div>
-                    <div class="mt-6 text-center text-sm opacity-80">点击复制 HEX 色值</div>
+            <div class="lg:col-span-2 glass-card flex flex-col">
+                <div id="mainCard" class="flex-1 flex flex-col items-center justify-center p-6 md:p-8 min-h-[300px] select-none transition-colors duration-300">
+                    <div id="mainName" class="text-4xl md:text-5xl font-bold mb-1 tracking-widest font-serif leading-tight"></div>
+                    <div id="mainPinyin" class="text-sm opacity-80 mb-4 font-mono tracking-wider"></div>
+                    
+                    <!-- HEX / RGB / CMYK Values Display Cards -->
+                    <div class="grid grid-cols-3 gap-2 w-full max-w-sm mb-4">
+                        <div id="badgeHex" class="val-badge p-2.5 text-center" title="点击复制 HEX 色值">
+                            <div class="text-[10px] opacity-70 uppercase tracking-widest font-mono">HEX</div>
+                            <div id="mainHex" class="font-mono text-sm sm:text-base font-bold tracking-wider"></div>
+                        </div>
+                        <div id="badgeRgb" class="val-badge p-2.5 text-center" title="点击复制 RGB 色值">
+                            <div class="text-[10px] opacity-70 uppercase tracking-widest font-mono">RGB</div>
+                            <div id="mainRgb" class="font-mono text-xs sm:text-sm font-semibold truncate"></div>
+                        </div>
+                        <div id="badgeCmyk" class="val-badge p-2.5 text-center" title="点击复制 CMYK 色值">
+                            <div class="text-[10px] opacity-70 uppercase tracking-widest font-mono">CMYK</div>
+                            <div id="mainCmyk" class="font-mono text-xs sm:text-sm font-semibold truncate"></div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Action Chips -->
+                    <div class="flex flex-wrap items-center justify-center gap-2">
+                        <button id="copyHexBtn" class="action-chip" title="复制 HEX 代码">复制 HEX</button>
+                        <button id="copyRgbBtn" class="action-chip" title="复制 RGB 代码">复制 RGB</button>
+                        <button id="copyCmykBtn" class="action-chip" title="复制 CMYK 色值">复制 CMYK</button>
+                        <button id="copyCssBtn" class="action-chip" title="复制 CSS 规则">复制 CSS</button>
+                        <button id="copyCardBtn" class="action-chip" title="复制完整色卡信息">复制色卡</button>
+                    </div>
+                    <div class="mt-3 text-center text-xs opacity-70">点击数值卡片或操作按钮即可一键复制</div>
                 </div>
             </div>
 
             <!-- 配色方案 -->
             <div class="lg:col-span-3 glass-card">
-                <div class="p-6 flex flex-col gap-4 h-full">
+                <div class="p-5 md:p-6 flex flex-col gap-4 h-full">
                     <div class="flex flex-wrap items-center justify-between gap-3">
-                        <h2 class="text-lg">配色方案</h2>
+                        <div>
+                            <h2 class="text-lg font-bold m-0">配色方案</h2>
+                            <p class="text-xs opacity-70 mt-0.5">单色、邻近、互补、三角与传统五色 · 单击复制，双击设为主色</p>
+                        </div>
                         <div class="flex gap-2">
-                            <button id="randomBtn" class="px-4 py-2 font-bold transition-transform hover:-translate-y-px" style="background:var(--text-color); color:var(--bg-color);">随机配色</button>
-                            <button id="copyMainBtn" class="px-4 py-2 font-bold transition-transform hover:-translate-y-px" style="background:var(--bg-color); color:var(--text-color); border:1px solid var(--text-color);">复制 HEX</button>
+                            <button id="randomBtn" class="px-3.5 py-1.5 text-sm font-bold transition-transform hover:-translate-y-px" style="background:var(--text-color); color:var(--bg-color);">随机配色</button>
+                            <button id="locateMainBtn" class="px-3 py-1.5 text-sm font-bold transition-transform hover:-translate-y-px" style="background:var(--bg-color); color:var(--text-color); border:1px solid var(--text-color);" title="在颜色库中定位当前主色">定位主色</button>
                         </div>
                     </div>
-                    <div id="paletteContainer" class="space-y-5 flex-1"></div>
+                    <div id="paletteContainer" class="space-y-4 flex-1"></div>
                 </div>
             </div>
         </div>
 
         <!-- 颜色库 -->
         <div class="glass-card">
+            <!-- Header bar: Title, Search, Sort, Count -->
             <div class="p-4 border-b flex flex-wrap items-center gap-3" style="border-color:var(--border-color);">
-                <h2 class="text-lg m-0">颜色库</h2>
-                <div class="flex-1 min-w-[180px] max-w-sm ml-auto">
-                    <input id="searchInput" type="text" placeholder="搜索颜色名 / 拼音" class="w-full bg-white border p-2 text-sm focus:outline-none focus:ring-2 focus:ring-theme" style="border-color:var(--border-color); color:#4c1f24;">
+                <div class="flex items-center gap-2">
+                    <h2 class="text-lg font-bold m-0">传统颜色库</h2>
+                    <span id="colorCount" class="text-xs px-2 py-0.5 rounded-none font-mono opacity-80" style="border: 1px solid var(--border-color); background: rgba(255,255,255,0.2);"></span>
                 </div>
-                <span id="colorCount" class="text-xs opacity-70"></span>
+                <div class="flex-1 min-w-[200px] max-w-md ml-auto">
+                    <input id="searchInput" type="text" placeholder="搜索颜色名 / 拼音 / HEX / RGB / CMYK" class="w-full bg-white border p-2 text-sm focus:outline-none focus:ring-2 focus:ring-theme" style="border-color:var(--border-color); color:#4c1f24;">
+                </div>
+                <select id="sortSelect" class="bg-white border p-2 text-sm focus:outline-none focus:ring-2 focus:ring-theme" style="border-color:var(--border-color); color:#4c1f24;">
+                    <option value="default">默认顺序 (传统编排)</option>
+                    <option value="pinyin">按拼音 (A → Z)</option>
+                    <option value="color">按色相 (色相环)</option>
+                    <option value="brightness-desc">按明度 (亮 → 暗)</option>
+                    <option value="brightness-asc">按明度 (暗 → 亮)</option>
+                    <option value="saturation-desc">按饱和度 (浓郁 → 雅淡)</option>
+                    <option value="saturation-asc">按饱和度 (雅淡 → 浓郁)</option>
+                </select>
             </div>
-            <div id="colorGrid" class="p-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2"></div>
+
+            <!-- Category Filter Tabs -->
+            <div class="px-4 py-2.5 border-b flex items-center gap-1.5 overflow-x-auto" style="border-color:var(--border-color);" id="catFilterBar">
+                <button class="cat-btn active" data-cat="all">全部 (751)</button>
+                <button class="cat-btn" data-cat="red">红色系 (151)</button>
+                <button class="cat-btn" data-cat="yellow">黄橙系 (181)</button>
+                <button class="cat-btn" data-cat="green">绿色系 (85)</button>
+                <button class="cat-btn" data-cat="blue">青蓝系 (133)</button>
+                <button class="cat-btn" data-cat="purple">紫色系 (86)</button>
+                <button class="cat-btn" data-cat="brown">棕褐系 (41)</button>
+                <button class="cat-btn" data-cat="neutral">水墨灰黑白 (74)</button>
+            </div>
+
+            <!-- Color Grid -->
+            <div id="colorGrid" class="p-4 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-2 min-h-[200px]"></div>
         </div>
     </div>
 
     <div id="toast" class="restore-toast"></div>
 
     <script>
+        // 751 种中国传统色数据集（来自 颜色.csv）
+        // 字段依次为：[中文名, 英文/拼音, hex, RGB, CMYK]
         const COLORS = [
-["暗玉紫","anyuzi","#5c2223"],
-["牡丹粉红","mudanfenhong","#eea2a4"],
-["栗紫","lizi","#5a191b"],
-["香叶红","xiangyehong","#f07c82"],
-["葡萄酱紫","putaojiangzi","#5a1216"],
-["艳红","yanhong","#ed5a65"],
-["玉红","yuhong","#c04851"],
-["茶花红","chahuahong","#ee3f4d"],
-["高粱红","gaolianghong","#c02c38"],
-["满江红","manjianghong","#a7535a"],
-["鼠鼻红","shubihong","#e3b4b8"],
-["合欢红","hehuanhong","#f0a1a8"],
-["春梅红","chunmeihong","#f1939c"],
-["苋菜红","xiancaihong","#a61b29"],
-["烟红","yanhong","#894e54"],
-["莓红","meihong","#c45a65"],
-["鹅冠红","eguanhong","#d11a2d"],
-["枫叶红","fengyehong","#c21f30"],
-["唐菖蒲红","tangchangpuhong","#de1c31"],
-["枣红","zaohong","#7c1823"],
-["猪肝紫","zhuganzi","#541e24"],
-["葡萄紫","putaozi","#4c1f24"],
-["暗紫苑红","anziyuanhong","#82202b"],
-["殷红","yanhong","#82111f"],
-["草茉莉红","caomolihong","#ef475d"],
-["酱紫","jiangzi","#4d1018"],
-["山茶红","shanchahong","#ed556a"],
-["锌灰","xinhui","#7a7374"],
-["海棠红","haitanghong","#f03752"],
-["蓟粉红","jifenhong","#e6d2d5"],
-["石蕊红","shiruihong","#f0c9cf"],
-["淡曙红","danshuhong","#ee2746"],
-["李紫","lizi","#2b1216"],
-["石竹红","shizhuhong","#ee4863"],
-["淡茜红","danqianhong","#e77c8e"],
-["金鱼紫","jinyuzi","#500a16"],
-["山黎豆红","shanlidouhong","#c27c88"],
-["鼠背灰","shubeihui","#73575c"],
-["淡蕊香红","danruixianghong","#ee4866"],
-["甘蔗紫","ganzhezi","#621624"],
-["月季红","yuejihong","#ce5777"],
-["尖晶玉红","jianjingyuhong","#cc163a"],
-["水红","shuihong","#f1c4cd"],
-["姜红","jianghong","#eeb8c3"],
-["芦灰","luhui","#856d72"],
-["茄皮紫","qiepizi","#2d0c13"],
-["苍蝇灰","cangyinghui","#36282b"],
-["锦葵红","jinkuihong","#bf3553"],
-["粉团花红","fentuanhuahong","#ec9bad"],
-["石竹紫","shizhuzi","#63071c"],
-["卵石紫","luanshizi","#30161c"],
-["晶红","jinghong","#eea6b7"],
-["芝兰紫","zhilanzi","#e9ccd3"],
-["芍药耕红","shaoyaogenghong","#eba0b3"],
-["暮云灰","muyunhui","#4f383e"],
-["豇豆红","jiangdouhong","#ed9db2"],
-["报春红","baochunhong","#ec8aa4"],
-["淡绛红","danjianghong","#ec7696"],
-["凤仙花红","fengxianhuahong","#ea7293"],
-["霞光红","xiaguanghong","#ef82a0"],
-["喜蛋红","xidanhong","#ec2c64"],
-["夹竹桃红","jiazhutaohong","#eb507e"],
-["松叶牡丹红","songyemudanhong","#eb3c70"],
-["莲瓣红","lianbanhong","#ea517f"],
-["白芨红","baijihong","#de7897"],
-["隐红灰","yinhonghui","#b598a1"],
-["榲桲红","wenpohong","#ed2f6a"],
-["酢酱草红","cujiangcaohong","#c5708b"],
-["火鹅紫","huoezi","#33141e"],
-["鹞冠紫","yaoguanzi","#621d34"],
-["品红","pinhong","#ef3473"],
-["磨石紫","moshizi","#382129"],
-["墨紫","mozi","#310f1b"],
-["檀紫","tanzi","#381924"],
-["初荷红","chuhehong","#e16c96"],
-["菜头紫","caitouzi","#951c48"],
-["葡萄酒红","putaojiuhong","#62102e"],
-["淡青紫","danqingzi","#e0c8d1"],
-["菠根红","bogenhong","#d13c74"],
-["海象紫","haixiangzi","#4b1e2f"],
-["兔眼红","tuyanhong","#ec4e8a"],
-["嫩菱红","nenlinghong","#de3f7c"],
-["洋葱紫","yangcongzi","#a8456b"],
-["吊钟花红","diaozhonghuahong","#ce5e8a"],
-["绀紫","ganzi","#461629"],
-["紫荆红","zijinghong","#ee2c79"],
-["扁豆花红","biandouhuahong","#ef498b"],
-["马鞭草紫","mabiancaozi","#ede3e7"],
-["藏花红","canghuahong","#ec2d7a"],
-["斑鸠灰","banjiuhui","#482936"],
-["古铜紫","gutongzi","#440e25"],
-["丹紫红","danzihong","#d2568c"],
-["丁香淡紫","dingxiangdanzi","#e9d7df"],
-["玫瑰红","meiguihong","#d2357d"],
-["古鼎灰","gudinghui","#36292f"],
-["菱锰红","lingmenghong","#d276a3"],
-["樱草紫","yingcaozi","#c06f98"],
-["龙须红","longxuhong","#cc5595"],
-["电气石红","dianqishihong","#c35691"],
-["玫瑰紫","meiguizi","#ba2f7b"],
-["苋菜紫","xiancaizi","#9b1e64"],
-["紫灰","zihui","#5d3f51"],
-["龙睛鱼紫","longjingyuzi","#4e2a40"],
-["青蛤壳紫","qinghakezi","#bc84a8"],
-["萝兰紫","luolanzi","#c08eaf"],
-["荸荠紫","biqizi","#411c35"],
-["豆蔻紫","doukouzi","#ad6598"],
-["扁豆紫","biandouzi","#a35c8f"],
-["牵牛紫","qianniuzi","#681752"],
-["芓紫","zizi","#894276"],
-["葛巾紫","gejinzi","#7e2065"],
-["青莲","qinglian","#8b2671"],
-["芥花紫","jiehuazi","#983680"],
-["凤信紫","fengxinzi","#c8adc4"],
-["深牵牛紫","shenqianniuzi","#1c0d1a"],
-["魏紫","weizi","#7e1671"],
-["乌梅紫","wumeizi","#1e131d"],
-["桔梗紫","jiegengzi","#813c85"],
-["淡牵牛紫","danqianniuzi","#d1c2d3"],
-["剑锋紫","jianfengzi","#3e3841"],
-["蕈紫","xunzi","#815c94"],
-["槿紫","jinzi","#806d9e"],
-["芡食白","qianshibai","#e2e1e4"],
-["龙葵紫","longkuizi","#322f3b"],
-["藤萝紫","tengluozi","#8076a3"],
-["沙鱼灰","shayuhui","#35333c"],
-["暗龙胆紫","anlongdanzi","#22202e"],
-["暗蓝紫","anlanzi","#131124"],
-["野葡萄紫","yeputaozi","#302f4b"],
-["野菊紫","yejuzi","#525288"],
-["水牛灰","shuiniuhui","#2f2f35"],
-["远山紫","yuanshanzi","#ccccd6"],
-["螺甸紫","luodianzi","#74759b"],
-["晶石紫","jingshizi","#1f2040"],
-["满天星紫","mantianxingzi","#2e317c"],
-["淡蓝紫","danlanzi","#a7a8bd"],
-["山梗紫","shangengzi","#61649f"],
-["牛角灰","niujiaohui","#2d2e36"],
-["鱼尾灰","yuweihui","#5e616d"],
-["瓦罐灰","waguanhui","#47484c"],
-["钢蓝","ganglan","#0f1423"],
-["燕颔蓝","yanhanlan","#131824"],
-["鲸鱼灰","jingyuhui","#475164"],
-["青灰","qinghui","#2b333e"],
-["鸽蓝","gelan","#1c2938"],
-["暗蓝","anlan","#101f30"],
-["钢青","gangqing","#142334"],
-["海涛蓝","haitaolan","#15559a"],
-["飞燕草蓝","feiyancaolan","#0f59a4"],
-["靛青","dianqing","#1661ab"],
-["安安蓝","ananlan","#3170a7"],
-["海军蓝","haijunlan","#346c9c"],
-["景泰蓝","jingtailan","#2775b6"],
-["品蓝","pinlan","#2b73af"],
-["尼罗蓝","niluolan","#2474b5"],
-["蝶翅蓝","diechilan","#4e7ca1"],
-["花青","huaqing","#2376b7"],
-["鷃蓝","yanlan","#144a74"],
-["星蓝","xinglan","#93b5cf"],
-["虹蓝","honglan","#2177b8"],
-["柏林蓝","bolinlan","#126bae"],
-["群青","qunqing","#1772b4"],
-["云水蓝","yunshuilan","#baccd9"],
-["羽扇豆蓝","yushandoulan","#619ac3"],
-["战舰灰","zhanjianhui","#495c69"],
-["晴山蓝","qingshanlan","#8fb2c9"],
-["睛蓝","jinglan","#5698c3"],
-["搪磁蓝","tangcilan","#11659a"],
-["潮蓝","chaolan","#2983bb"],
-["天蓝","tianlan","#1677b3"],
-["大理石灰","dalishihui","#c4cbcf"],
-["牵牛花蓝","qianniuhualan","#1177b0"],
-["宝石蓝","baoshilan","#2486b9"],
-["淡蓝灰","danlanhui","#5e7987"],
-["嫩灰","nenhui","#74787a"],
-["银鱼白","yinyubai","#cdd1d3"],
-["釉蓝","youlan","#1781b5"],
-["涧石蓝","jianshilan","#66a9c9"],
-["远天蓝","yuantianlan","#d0dfe6"],
-["云山蓝","yunshanlan","#2f90b9"],
-["秋波蓝","qiubolan","#8abcd1"],
-["井天蓝","jingtianlan","#c3d7df"],
-["鸢尾蓝","yuanweilan","#158bb8"],
-["云峰白","yunfengbai","#d8e3e7"],
-["星灰","xinghui","#b2bbbe"],
-["钴蓝","gulan","#1a94bc"],
-["碧青","biqing","#5cb3cc"],
-["苍蓝","canglan","#134857"],
-["深灰蓝","shenhuilan","#132c33"],
-["灰蓝","huilan","#21373d"],
-["湖水蓝","hushuilan","#b0d5df"],
-["海青","haiqing","#22a2c3"],
-["黄昏灰","huanghunhui","#474b4c"],
-["霁青","jiqing","#63bbd0"],
-["玉鈫蓝","yuqinlan","#126e82"],
-["胆矾蓝","danfanlan","#0f95b0"],
-["樫鸟蓝","jianniaolan","#1491a8"],
-["鸥蓝","oulan","#c7d2d4"],
-["翠蓝","cuilan","#1e9eb3"],
-["蜻蜓蓝","qingtinglan","#3b818c"],
-["孔雀蓝","kongquelan","#0eb0c9"],
-["蔚蓝","weilan","#29b7cb"],
-["瀑布蓝","pubulan","#51c4d3"],
-["闪蓝","shanlan","#7cabb1"],
-["甸子蓝","dianzilan","#10aec2"],
-["晚波蓝","wanbolan","#648e93"],
-["清水蓝","qingshuilan","#93d5dc"],
-["夏云灰","xiayunhui","#617172"],
-["海天蓝","haitianlan","#c6e6e8"],
-["虾壳青","xiakeqing","#869d9d"],
-["石绿","shilv","#57c3c2"],
-["穹灰","qionghui","#c4d7d6"],
-["美蝶绿","meidielv","#12aa9c"],
-["垩灰","ehui","#737c7b"],
-["蓝绿","lanlv","#12a182"],
-["竹绿","zhulv","#1ba784"],
-["亚丁绿","yadinglv","#428675"],
-["月影白","yueyingbai","#c0c4c3"],
-["海王绿","haiwanglv","#248067"],
-["深海绿","shenhailv","#1a3b32"],
-["绿灰","lvhui","#314a43"],
-["青矾绿","qingfanlv","#2c9678"],
-["苍绿","canglv","#223e36"],
-["飞泉绿","feiquanlv","#497568"],
-["莽丛绿","mangconglv","#141e1b"],
-["梧枝绿","wuzhilv","#69a794"],
-["铜绿","tonglv","#2bae85"],
-["草原远绿","caoyuanyuanlv","#9abeaf"],
-["蛙绿","walv","#45b787"],
-["浪花绿","langhualv","#92b3a5"],
-["苷蓝绿","ganlanlv","#1f2623"],
-["粉绿","fenlv","#83cbac"],
-["淡绿灰","danlvhui","#70887d"],
-["麦苗绿","maimiaolv","#55bb8a"],
-["翠绿","cuilv","#20a162"],
-["葱绿","conglv","#40a070"],
-["荷叶绿","heyelv","#1a6840"],
-["淡绿","danlv","#61ac85"],
-["田园绿","tianyuanlv","#68b88e"],
-["玉簪绿","yuzanlv","#a4cab6"],
-["蟾绿","chanlv","#3c9566"],
-["蔻梢绿","koushaolv","#5dbe8a"],
-["薄荷绿","bohelv","#207f4c"],
-["月白","yuebai","#eef7f2"],
-["蛋白石绿","danbaishilv","#579572"],
-["竹篁绿","zhuhuanglv","#b9dec9"],
-["孔雀绿","kongquelv","#229453"],
-["宫殿绿","gongdianlv","#20894d"],
-["云杉绿","yunshanlv","#15231b"],
-["毛绿","maolv","#66c18c"],
-["冰山蓝","bingshanlan","#a4aca7"],
-["明灰","minghui","#8a988e"],
-["明绿","minglv","#9eccab"],
-["松霜绿","songshuanglv","#83a78d"],
-["白屈菜绿","baiqucailv","#485b4d"],
-["狼烟灰","langyanhui","#5d655f"],
-["瓦松绿","wasonglv","#6e8b74"],
-["槲寄生绿","hujishenglv","#2b312c"],
-["淡翠绿","dancuilv","#c6dfc8"],
-["玉髓绿","yusuilv","#41b349"],
-["鲜绿","xianlv","#43b244"],
-["油绿","youlv","#253d24"],
-["宝石绿","baoshilv","#41ae3c"],
-["嘉陵水绿","jialingshuilv","#add5a2"],
-["田螺绿","tianluolv","#5e665b"],
-["水绿","shuilv","#8cc269"],
-["鹦鹉绿","yingwulv","#5bae23"],
-["艾背绿","aibeilv","#dfecd5"],
-["艾绿","ailv","#cad3c3"],
-["镍灰","niehui","#9fa39a"],
-["橄榄石绿","ganlanshilv","#b2cf87"],
-["芽绿","yalv","#96c24e"],
-["嫩菊绿","nenjulv","#f0f5e5"],
-["芦苇绿","luweilv","#b7d07a"],
-["姚黄","yaohuang","#d0deaa"],
-["蒽油绿","enyoulv","#373834"],
-["苹果绿","pingguolv","#bacf65"],
-["海沬绿","haimeilv","#e2e7bf"],
-["橄榄黄绿","ganlanhuanglv","#bec936"],
-["槐花黄绿","huaihuahuanglv","#d2d97a"],
-["蝶黄","diehuang","#e2d849"],
-["象牙白","xiangyabai","#fffef8"],
-["橄榄绿","ganlanlv","#5e5314"],
-["雪白","xuebai","#fffef9"],
-["淡灰绿","danhuilv","#ad9e5f"],
-["佛手黄","foshouhuang","#fed71a"],
-["乳白","rubai","#f9f4dc"],
-["香蕉黄","xiangjiaohuang","#e4bf11"],
-["新禾绿","xinhelv","#d2b116"],
-["油菜花黄","youcaihuahuang","#fbda41"],
-["秋葵黄","qiukuihuang","#eed045"],
-["柚黄","youhuang","#f1ca17"],
-["草黄","caohuang","#d2b42c"],
-["硫华黄","liuhuahuang","#f2ce2b"],
-["姜黄","jianghuang","#e2c027"],
-["潭水绿","tanshuilv","#645822"],
-["金瓜黄","jinguahuang","#fcd217"],
-["麦秆黄","maiganhuang","#f8df70"],
-["蒿黄","haohuang","#dfc243"],
-["茉莉黄","molihuang","#f8df72"],
-["藤黄","tenghuang","#ffd111"],
-["芒果黄","mangguohuang","#ddc871"],
-["海参灰","haishenhui","#fffefa"],
-["碧螺春绿","biluochunlv","#867018"],
-["苔绿","tailv","#887322"],
-["柠檬黄","ningmenghuang","#fcd337"],
-["草灰绿","caohuilv","#8e804b"],
-["向日葵黄","xiangrikuihuang","#fecc11"],
-["素馨黄","suxinhuang","#fccb16"],
-["乳鸭黄","ruyahuang","#ffc90c"],
-["月灰","yuehui","#b7ae8f"],
-["葵扇黄","kuishanhuang","#f8d86a"],
-["大豆黄","dadouhuang","#fbcd31"],
-["金盏黄","jinzhanhuang","#fcc307"],
-["菊蕾白","juleibai","#e9ddb6"],
-["黄连黄","huanglianhuang","#fcc515"],
-["杏仁黄","xingrenhuang","#f7e8aa"],
-["谷黄","guhuang","#e8b004"],
-["木瓜黄","muguahuang","#f9c116"],
-["淡茧黄","danjianhuang","#f9d770"],
-["雅梨黄","yalihuang","#fbc82f"],
-["银白","yinbai","#f1f0ed"],
-["棕榈绿","zonglvlv","#5b4913"],
-["鹦鹉冠黄","yingwuguanhuang","#f6c430"],
-["枯绿","kulv","#b78d12"],
-["浅烙黄","qianlaohuang","#f9bd10"],
-["淡密黄","danmihuang","#f9d367"],
-["芥黄","jiehuang","#d9a40e"],
-["栀子黄","zhizihuang","#ebb10d"],
-["暗海水绿","anhaishuilv","#584717"],
-["篾黄","miehuang","#f7de98"],
-["蚌肉白","bangroubai","#f9f1db"],
-["炒米黄","chaomihuang","#f4ce69"],
-["琥珀黄","hupohuang","#feba07"],
-["灰绿","huilv","#8a6913"],
-["粽叶绿","zongyelv","#876818"],
-["尘灰","chenhui","#b6a476"],
-["鼬黄","youhuang","#fcb70a"],
-["象牙黄","xiangyahuang","#f0d695"],
-["鲛青","jiaoqing","#87723e"],
-["豆汁黄","douzhihuang","#f8e8c1"],
-["土黄","tuhuang","#d6a01d"],
-["香水玫瑰黄","xiangshuimeiguihuang","#f7da94"],
-["虎皮黄","hupihuang","#eaad1a"],
-["鸡蛋黄","jidanhuang","#fbb612"],
-["银鼠灰","yinshuhui","#b5aa90"],
-["鱼肚白","yudubai","#f7f4ed"],
-["初熟杏黄","chushuxinghuang","#f8bc31"],
-["山鸡黄","shanjihuang","#b78b26"],
-["莲子白","lianzibai","#e5d3aa"],
-["蟹壳灰","xiekehui","#695e45"],
-["沙石黄","shashihuang","#e5b751"],
-["甘草黄","gancaohuang","#f3bf4c"],
-["燕羽灰","yanyuhui","#685e48"],
-["鹅掌黄","ezhanghuang","#fbb929"],
-["麦芽糖黄","maiyatanghuang","#f9d27d"],
-["浅驼色","qiantuose","#e2c17c"],
-["百灵鸟灰","bailingniaohui","#b4a992"],
-["酪黄","laohuang","#f6dead"],
-["荔肉白","liroubai","#f2e6ce"],
-["淡肉色","danrouse","#f8e0b0"],
-["河豚灰","hetunhui","#393733"],
-["蜴蜊绿","yililv","#835e1d"],
-["汉白玉","hanbaiyu","#f8f4ed"],
-["橙皮黄","chengpihuang","#fca104"],
-["莱阳梨黄","laiyanglihuang","#815f25"],
-["枇杷黄","pipahuang","#fca106"],
-["金叶黄","jinyehuang","#ffa60f"],
-["苍黄","canghuang","#806332"],
-["粉白","fenbai","#fbf2e3"],
-["淡橘橙","danjucheng","#fba414"],
-["珍珠灰","zhenzhuhui","#e4dfd7"],
-["龟背黄","guibeihuang","#826b48"],
-["浅灰","qianhui","#dad4cb"],
-["铅灰","qianhui","#bbb5ac"],
-["中灰","zhonghui","#bbb5ac"],
-["雄黄","xionghuang","#ff9900"],
-["蜜黄","mihuang","#fbb957"],
-["风帆黄","fengfanhuang","#dc9123"],
-["桂皮淡棕","guipidanzong","#c09351"],
-["金莺黄","jinyinghuang","#f4a83a"],
-["肉色","rouse","#f7c173"],
-["凋叶棕","diaoyezong","#e7a23f"],
-["古铜绿","gutonglv","#533c1b"],
-["落英淡粉","luoyingdanfen","#f9e8d0"],
-["软木黄","ruanmuhuang","#de9e44"],
-["瓜瓤粉","guarangfen","#f9cb8b"],
-["榴萼黄","liuehuang","#f9a633"],
-["玳瑁黄","daimaohuang","#daa45a"],
-["焦茶绿","jiaochalv","#553b18"],
-["蟹壳绿","xiekelv","#513c20"],
-["山鸡褐","shanjihe","#986524"],
-["猴毛灰","houmaohui","#97846c"],
-["鹿角棕","lujiaozong","#e3bd8d"],
-["淡松烟","dansongyan","#4d4030"],
-["万寿菊黄","wanshoujuhuang","#fb8b05"],
-["蛋壳黄","dankehuang","#f8c387"],
-["杏黄","xinghuang","#f28e16"],
-["橄榄灰","ganlanhui","#503e2a"],
-["鹤灰","hehui","#4a4035"],
-["玛瑙灰","manaohui","#cfccc9"],
-["淡银灰","danyinhui","#c1b2a3"],
-["瓦灰","wahui","#867e76"],
-["夜灰","yehui","#847c74"],
-["北瓜黄","beiguahuang","#fc8c23"],
-["荷花白","hehuabai","#fbecde"],
-["松鼠灰","songshuhui","#4f4032"],
-["淡米粉","danmifen","#fbeee2"],
-["深灰","shenhui","#81776e"],
-["海鸥灰","haiouhui","#9a8878"],
-["茶褐","chahe","#5d3d21"],
-["驼色","tuose","#66462a"],
-["银灰","yinhui","#918072"],
-["鹿皮褐","lupihe","#d99156"],
-["槟榔综","binglangzong","#c1651a"],
-["晓灰","xiaohui","#d4c4b7"],
-["淡赭","danzhe","#be7e4a"],
-["古铜褐","gutonghe","#5c3719"],
-["麂棕","jizong","#de7622"],
-["醉瓜肉","zuiguarou","#db8540"],
-["雁灰","yanhui","#80766e"],
-["鲑鱼红","guiyuhong","#f09c5a"],
-["橘橙","jucheng","#f97d1c"],
-["金黄","jinhuang","#f26b1f"],
-["玫瑰粉","meiguifen","#f8b37f"],
-["美人焦橙","meirenjiaocheng","#fa7e23"],
-["米色","mise","#f9e9cd"],
-["蛛网灰","zhuwanghui","#b7a091"],
-["淡咖啡","dankafei","#945833"],
-["海螺橙","hailuocheng","#f0945d"],
-["岩石棕","yanshizong","#964d22"],
-["芒果棕","mangguozong","#954416"],
-["陶瓷红","taocihong","#e16723"],
-["菠萝红","boluohong","#fc7930"],
-["余烬红","yujinhong","#cf7543"],
-["金莲花橙","jinlianhuacheng","#f86b1d"],
-["火砖红","huozhuanhong","#cd6227"],
-["初桃粉红","chutaofenhong","#f6dcce"],
-["铁棕","tiezong","#d85916"],
-["介壳淡粉红","jieqiaodanfenhong","#f7cfba"],
-["蟹壳红","xiekehong","#f27635"],
-["金驼","jintuo","#e46828"],
-["燕颔红","yanhanhong","#fc6315"],
-["淡可可棕","dankekezong","#b7511d"],
-["晨曦红","chenxihong","#ea8958"],
-["玉粉红","yufenhong","#e8b49a"],
-["野蔷薇红","yeqiangweihong","#fb9968"],
-["藕荷","ouhe","#edc3ae"],
-["长石灰","changshihui","#363433"],
-["中红灰","zhonghonghui","#8b614d"],
-["火泥棕","huonizong","#aa6a4c"],
-["绀红","ganhong","#a6522c"],
-["莓酱红","meijianghong","#fa5d19"],
-["丁香棕","dingxiangzong","#71361d"],
-["淡玫瑰灰","danmeiguihui","#b89485"],
-["瓜瓤红","guaranghong","#f68c60"],
-["淡藏花红","dancanghuahong","#f6ad8f"],
-["筍皮棕","sunpizong","#732e12"],
-["润红","runhong","#f7cdbc"],
-["龙睛鱼红","longjingyuhong","#ef632b"],
-["淡土黄","dantuhuang","#8c4b31"],
-["珠母灰","zhumuhui","#64483d"],
-["芙蓉红","furonghong","#f9723d"],
-["落霞红","luoxiahong","#cf4813"],
-["法螺红","faluohong","#ee8055"],
-["草珠红","caozhuhong","#f8ebe6"],
-["咖啡","kafei","#753117"],
-["中灰驼","zhonghuituo","#603d30"],
-["椰壳棕","yekezong","#883a1e"],
-["蟹蝥红","xiemaohong","#b14b28"],
-["淡豆沙","dandousha","#873d24"],
-["淡桃红","dantaohong","#f6cec1"],
-["淡铁灰","dantiehui","#5b423a"],
-["石板灰","shibanhui","#624941"],
-["淡栗棕","danlizong","#673424"],
-["银朱","yinzhu","#f43e06"],
-["草莓红","caomeihong","#ef6f48"],
-["洋水仙红","yangshuixianhong","#f4c7ba"],
-["朱红","zhuhong","#ed5126"],
-["榴花红","liuhuahong","#f34718"],
-["柿红","shihong","#f2481b"],
-["可可棕","kekezong","#652b1c"],
-["淡罂粟红","danyingsuhong","#eea08c"],
-["大红","dahong","#f04b22"],
-["柞叶棕","zhayezong","#692a1b"],
-["蜻蜓红","qingtinghong","#f1441d"],
-["橡树棕","xiangshuzong","#773d31"],
-["颊红","jiahong","#eeaa9c"],
-["桃红","taohong","#f0ada0"],
-["火岩棕","huoyanzong","#863020"],
-["淡藤萝紫","dantengluozi","#f2e7e5"],
-["赭石","zheshi","#862617"],
-["铁水红","tieshuihong","#f5391c"],
-["胭脂红","yanzhihong","#f03f24"],
-["极光红","jiguanghong","#f33b1f"],
-["红汞红","honggonghong","#f23e23"],
-["萝卜红","luobohong","#f13c22"],
-["曲红","quhong","#f05a46"],
-["谷鞘红","guqiaohong","#f17666"],
-["苹果红","pingguohong","#f15642"],
-["桂红","guihong","#f25a47"],
-["粉红","fenhong","#f2b9b2"],
-["暗驼棕","antuozong","#592620"],
-["夕阳红","xiyanghong","#de2a18"],
-["樱桃红","yingtaohong","#ed3321"],
-["珊瑚红","shanhuhong","#f04a3a"],
-["火山棕","huoshanzong","#482522"],
-["栗棕","lizong","#5c1e19"],
-["鹤顶红","hedinghong","#d42517"],
-["舌红","shehong","#f19790"],
-["鹅血石红","exueshihong","#ab372f"],
-["酱棕","jiangzong","#5a1f1b"],
-["鱼鳃红","yusaihong","#ed3b2f"],
-["芦穗灰","lusuihui","#bdaead"],
-["丽春红","lichunhong","#eb261a"],
-["覆盆子红","fupenzihong","#ac1f18"],
-["海报灰","haibaohui","#483332"],
-["豆沙","dousha","#481e1c"],
-["榴子红","liuzihong","#f1908c"],
-["秋海棠红","qiuhaitanghong","#ec2b24"],
-["无花果红","wuhuaguohong","#efafad"],
-["淡绯","danfei","#f2cac9"],
-["玫瑰灰","meiguihui","#4b2e2b"],
-["淡菽红","danshuhong","#ed4845"],
-["枸枢红","goushuhong","#ed3333"],
-["貂紫","diaozi","#5d3131"]
+["暗玉紫", "anyuzi", "#5c2223", "92,34,35", "35,94,77,53"],
+["牡丹粉红", "mudanfenhong", "#eea2a4", "238,162,164", "0,49,27,0"],
+["栗紫", "lizi", "#5a191b", "90,25,27", "35,100,85,54"],
+["香叶红", "xiangyehong", "#f07c82", "240,124,130", "0,65,38,0"],
+["葡萄酱紫", "putaojiangzi", "#5a1216", "90,18,22", "35,100,80,54"],
+["艳红", "yanhong", "#ed5a65", "237,90,101", "0,77,49,0"],
+["玉红", "yuhong", "#c04851", "192,72,81", "13,83,62,3"],
+["茶花红", "chahuahong", "#ee3f4d", "238,63,77", "0,84,60,0"],
+["高粱红", "gaolianghong", "#c02c38", "192,44,56", "11,93,77,2"],
+["满江红", "manjianghong", "#a7535a", "167,83,90", "22,76,54,12"],
+["鼠鼻红", "shubihong", "#e3b4b8", "227,180,184", "5,38,20,0"],
+["合欢红", "hehuanhong", "#f0a1a8", "240,161,168", "0,50,23,0"],
+["春梅红", "chunmeihong", "#f1939c", "241,147,156", "0,56,27,0"],
+["苋菜红", "xiancaihong", "#a61b29", "166,27,41", "19,99,86,11"],
+["烟红", "yanhong", "#894e54", "137,78,84", "29,73,51,28"],
+["莓红", "meihong", "#c45a65", "196,90,101", "13,76,50,2"],
+["鹅冠红", "eguanhong", "#d11a2d", "209,26,45", "1,95,82,0"],
+["枫叶红", "fengyehong", "#c21f30", "194,31,48", "10,96,82,2"],
+["唐菖蒲红", "tangchangpuhong", "#de1c31", "222,28,49", "0,93,76,0"],
+["枣红", "zaohong", "#7c1823", "124,24,35", "28,100,86,33"],
+["猪肝紫", "zhuganzi", "#541e24", "84,30,36", "36,95,71,59"],
+["葡萄紫", "putaozi", "#4c1f24", "76,31,36", "39,92,67,64"],
+["暗紫苑红", "anziyuanhong", "#82202b", "130,32,43", "27,98,79,30"],
+["殷红", "yanhong", "#82111f", "130,17,31", "27,100,90,29"],
+["草茉莉红", "caomolihong", "#ef475d", "239,71,93", "0,82,50,0"],
+["酱紫", "jiangzi", "#4d1018", "77,16,24", "39,100,79,63"],
+["山茶红", "shanchahong", "#ed556a", "237,85,106", "0,78,44,0"],
+["锌灰", "xinhui", "#7a7374", "122,115,116", "48,45,40,26"],
+["海棠红", "haitanghong", "#f03752", "240,55,82", "0,86,55,0"],
+["蓟粉红", "jifenhong", "#e6d2d5", "230,210,213", "8,22,12,0"],
+["石蕊红", "shiruihong", "#f0c9cf", "240,201,207", "0,30,12,0"],
+["淡曙红", "danshuhong", "#ee2746", "238,39,70", "0,89,62,0"],
+["李紫", "lizi", "#2b1216", "43,18,22", "56,88,62,84"],
+["石竹红", "shizhuhong", "#ee4863", "238,72,99", "0,82,46,0"],
+["淡茜红", "danqianhong", "#e77c8e", "231,124,142", "0,65,29,0"],
+["金鱼紫", "jinyuzi", "#500a16", "80,10,22", "38,100,81,61"],
+["山黎豆红", "shanlidouhong", "#c27c88", "194,124,136", "16,61,34,4"],
+["鼠背灰", "shubeihui", "#73575c", "115,87,92", "41,64,44,36"],
+["淡蕊香红", "danruixianghong", "#ee4866", "238,72,102", "0,82,44,0"],
+["甘蔗紫", "ganzhezi", "#621624", "98,22,36", "33,100,75,49"],
+["月季红", "yuejihong", "#ce5777", "206,87,109", "8,78,35,1"],
+["尖晶玉红", "jianjingyuhong", "#cc163a", "204,22,58", "5,96,73,1"],
+["水红", "shuihong", "#f1c4cd", "241,196,205", "0,33,11,0"],
+["姜红", "jianghong", "#eeb8c3", "238,184,195", "0,39,14,0"],
+["芦灰", "luhui", "#856d72", "133,109,114", "39,53,38,25"],
+["茄皮紫", "qiepizi", "#2d0c13", "45,12,19", "58,90,63,83"],
+["苍蝇灰", "cangyinghui", "#36282b", "54,40,43", "57,72,54,74"],
+["锦葵红", "jinkuihong", "#bf3553", "191,53,83", "13,90,56,3"],
+["粉团花红", "fentuanhuahong", "#ec9bad", "236,155,173", "0,52,18,0"],
+["石竹紫", "shizhuzi", "#63071c", "99,7,28", "32,100,84,49"],
+["卵石紫", "luanshizi", "#30161c", "48,22,28", "52,88,58,81"],
+["晶红", "jinghong", "#eea6b7", "238,166,183", "0,48,15,0"],
+["芝兰紫", "zhilanzi", "#e9ccd3", "233,204,211", "3,26,10,0"],
+["芍药耕红", "shaoyaogenghong", "#eba0b3", "235,160,179", "0,50,16,0"],
+["暮云灰", "muyunhui", "#4f383e", "79,56,62", "49,71,49,58"],
+["豇豆红", "jiangdouhong", "#ed9db2", "237,157,178", "0,52,15,0"],
+["报春红", "baochunhong", "#ec8aa4", "236,138,164", "0,60,18,0"],
+["淡绛红", "danjianghong", "#ec7696", "236,118,150", "0,68,21,0"],
+["凤仙花红", "fengxianhuahong", "#ea7293", "234,114,147", "0,69,22,0"],
+["霞光红", "xiaguanghong", "#ef82a0", "239,130,160", "0,63,18,0"],
+["喜蛋红", "xidanhong", "#ec2c64", "236,44,100", "0,88,40,0"],
+["夹竹桃红", "jiazhutaohong", "#eb507e", "235,80,126", "0,80,28,0"],
+["松叶牡丹红", "songyemudanhong", "#eb3c70", "235,60,112", "0,85,33,0"],
+["莲瓣红", "lianbanhong", "#ea517f", "234,81,127", "0,80,27,0"],
+["白芨红", "baijihong", "#de7897", "222,120,151", "2,66,22,0"],
+["隐红灰", "yinhonghui", "#b598a1", "181,152,161", "26,43,26,6"],
+["榲桲红", "wenpohong", "#ed2f6a", "237,47,106", "0,88,36,0"],
+["酢酱草红", "cujiangcaohong", "#c5708b", "197,112,139", "15,68,28,2"],
+["火鹅紫", "huoezi", "#33141e", "51,20,30", "50,91,54,79"],
+["鹞冠紫", "yaoguanzi", "#621d34", "98,29,52", "34,97,54,50"],
+["品红", "pinhong", "#ef3473", "239,52,115", "0,86,30,0"],
+["磨石紫", "moshizi", "#382129", "56,33,41", "53,81,50,74"],
+["墨紫", "mozi", "#310f1b", "49,15,27", "53,92,55,81"],
+["檀紫", "tanzi", "#381924", "56,25,36", "48,90,50,76"],
+["初荷红", "chuhehong", "#e16c96", "225,108,150", "0,71,18,0"],
+["菜头紫", "caitouzi", "#951c48", "149,28,72", "24,99,52,19"],
+["葡萄酒红", "putaojiuhong", "#62102e", "98,16,46", "33,100,58,60"],
+["淡青紫", "danqingzi", "#e0c8d1", "224,200,209", "10,27,11,0"],
+["菠根红", "bogenhong", "#d13c74", "209,60,116", "5,87,30,1"],
+["海象紫", "haixiangzi", "#4b1e2f", "75,30,47", "40,92,47,64"],
+["兔眼红", "tuyanhong", "#ec4e8a", "236,78,138", "0,81,18,0"],
+["嫩菱红", "nenlinghong", "#de3f7c", "222,63,124", "0,85,24,0"],
+["洋葱紫", "yangcongzi", "#a8456b", "168,69,107", "22,83,34,11"],
+["吊钟花红", "diaozhonghuahong", "#ce5e8a", "206,94,138", "0,76,16,0"],
+["绀紫", "ganzi", "#461629", "70,22,41", "41,97,49,68"],
+["紫荆红", "zijinghong", "#ee2c79", "238,44,121", "0,87,24,0"],
+["扁豆花红", "biandouhuahong", "#ef498b", "239,73,139", "0,82,16,0"],
+["马鞭草紫", "mabiancaozi", "#ede3e7", "237,227,231", "6,13,7,0"],
+["藏花红", "canghuahong", "#ec2d7a", "236,45,122", "0,88,23,0"],
+["斑鸠灰", "banjiuhui", "#482936", "72,41,54", "49,82,46,63"],
+["古铜紫", "gutongzi", "#440e25", "68,14,37", "42,99,51,69"],
+["丹紫红", "danzihong", "#d2568c", "210,86,140", "7,79,18,0"],
+["丁香淡紫", "dingxiangdanzi", "#e9d7df", "233,215,223", "7,20,8,0"],
+["玫瑰红", "meiguihong", "#d2357d", "210,53,125", "4,89,21,0"],
+["古鼎灰", "gudinghui", "#36292f", "54,41,47", "63,74,52,70"],
+["菱锰红", "lingmenghong", "#d276a3", "210,118,163", "10,67,12,0"],
+["樱草紫", "yingcaozi", "#c06f98", "192,111,152", "19,68,18,1"],
+["龙须红", "longxuhong", "#cc5595", "204,85,149", "11,97,10,0"],
+["电气石红", "dianqishihong", "#c35691", "195,86,145", "16,79,14,1"],
+["玫瑰紫", "meiguizi", "#ba2f7b", "186,47,123", "18,91,18,2"],
+["苋菜紫", "xiancaizi", "#9b1e64", "155,30,100", "27,97,27,14"],
+["紫灰", "zihui", "#5d3f51", "93,63,81", "53,75,41,41"],
+["龙睛鱼紫", "longjingyuzi", "#4e2a40", "78,42,64", "55,87,41,52"],
+["青蛤壳紫", "qinghakezi", "#bc84a8", "188,132,168", "24,58,15,1"],
+["萝兰紫", "luolanzi", "#c08eaf", "192,142,175", "23,53,14,1"],
+["荸荠紫", "biqizi", "#411c35", "65,28,53", "58,96,40,61"],
+["豆蔻紫", "doukouzi", "#ad6598", "173,101,152", "31,71,15,1"],
+["扁豆紫", "biandouzi", "#a35c8f", "163,92,143", "35,75,18,2"],
+["牵牛紫", "qianniuzi", "#681752", "104,23,82", "49,100,29,32"],
+["芓紫", "zizi", "#894276", "137,66,118", "44,85,24,10"],
+["葛巾紫", "gejinzi", "#7e2065", "126,32,101", "45,99,24,16"],
+["青莲", "qinglian", "#8b2671", "139,38,113", "43,97,19,8"],
+["芥花紫", "jiehuazi", "#983680", "152,54,128", "39,91,15,3"],
+["凤信紫", "fengxinzi", "#c8adc4", "200,173,196", "21,37,12,0"],
+["深牵牛紫", "shenqianniuzi", "#1c0d1a", "28,13,26", "83,87,55,86"],
+["魏紫", "weizi", "#7e1671", "126,22,113", "52,100,17,7"],
+["乌梅紫", "wumeizi", "#1e131d", "30,19,29", "81,87,54,84"],
+["桔梗紫", "jiegengzi", "#813c85", "129,60,133", "54,89,12,1"],
+["淡牵牛紫", "danqianniuzi", "#d1c2d3", "209,194,211", "19,27,9,0"],
+["剑锋紫", "jianfengzi", "#3e3841", "62,56,65", "70,69,49,56"],
+["蕈紫", "xunzi", "#815c94", "129,92,148", "56,72,15,1"],
+["槿紫", "jinzi", "#806d9e", "128,109,158", "57,62,16,2"],
+["芡食白", "qianshibai", "#e2e1e4", "226,225,228", "13,10,9,0"],
+["龙葵紫", "longkuizi", "#322f3b", "50,47,59", "79,74,49,60"],
+["藤萝紫", "tengluozi", "#8076a3", "128,118,163", "58,56,17,2"],
+["沙鱼灰", "shayuhui", "#35333c", "53,51,60", "76,70,51,60"],
+["暗龙胆紫", "anlongdanzi", "#22202e", "34,32,46", "90,84,50,69"],
+["暗蓝紫", "anlanzi", "#131124", "19,17,36", "100,94,52,77"],
+["野葡萄紫", "yeputaozi", "#302f4b", "48,47,75", "91,84,40,43"],
+["野菊紫", "yejuzi", "#525288", "82,82,136", "80,73,21,6"],
+["水牛灰", "shuiniuhui", "#2f2f35", "47,47,53", "77,68,54,66"],
+["远山紫", "yuanshanzi", "#ccccd6", "204,204,214", "23,18,12,1"],
+["螺甸紫", "luodianzi", "#74759b", "116,117,155", "63,53,22,5"],
+["晶石紫", "jingshizi", "#1f2040", "31,32,64", "98,93,48,73"],
+["满天星紫", "mantianxingzi", "#2e317c", "46,49,124", "100,93,21,5"],
+["淡蓝紫", "danlanzi", "#a7a8bd", "167,168,189", "39,31,17,2"],
+["山梗紫", "shangengzi", "#61649f", "97,100,159", "74,64,14,1"],
+["牛角灰", "niujiaohui", "#2d2e36", "45,46,54", "80,70,53,65"],
+["鱼尾灰", "yuweihui", "#5e616d", "94,97,109", "64,52,39,28"],
+["瓦罐灰", "waguanhui", "#47484c", "71,72,76", "67,57,49,49"],
+["钢蓝", "ganglan", "#0f1423", "15,20,35", "100,89,54,79"],
+["燕颔蓝", "yanhanlan", "#131824", "19,24,36", "100,86,54,78"],
+["鲸鱼灰", "jingyuhui", "#475164", "71,81,100", "78,60,40,31"],
+["青灰", "qinghui", "#2b333e", "43,51,62", "87,69,51,58"],
+["鸽蓝", "gelan", "#1c2938", "28,41,56", "100,77,50,62"],
+["暗蓝", "anlan", "#101f30", "16,31,48", "100,84,51,68"],
+["钢青", "gangqing", "#142334", "20,35,52", "100,82,51,64"],
+["海涛蓝", "haitaolan", "#15559a", "21,85,154", "100,67,16,3"],
+["飞燕草蓝", "feiyancaolan", "#0f59a4", "15,89,164", "100,65,11,1"],
+["靛青", "dianqing", "#1661ab", "22,97,171", "100,60,8,1"],
+["安安蓝", "ananlan", "#3170a7", "49,112,167", "93,49,17,3"],
+["海军蓝", "haijunlan", "#346c9c", "52,108,156", "93,50,21,6"],
+["景泰蓝", "jingtailan", "#2775b6", "39,117,182", "95,46,10,1"],
+["品蓝", "pinlan", "#2b73af", "43,115,175", "95,47,14,2"],
+["尼罗蓝", "niluolan", "#2474b5", "36,116,181", "96,47,11,1"],
+["蝶翅蓝", "diechilan", "#4e7ca1", "78,124,161", "81,41,24,8"],
+["花青", "huaqing", "#2376b7", "35,118,183", "95,45,10,1"],
+["鷃蓝", "yanlan", "#144a74", "20,74,116", "100,68,32,20"],
+["星蓝", "xinglan", "#93b5cf", "147,181,207", "53,19,15,1"],
+["虹蓝", "honglan", "#2177b8", "33,119,184", "99,44,10,1"],
+["柏林蓝", "bolinlan", "#126bae", "18,107,174", "100,52,11,1"],
+["群青", "qunqing", "#1772b4", "23,114,180", "99,48,11,1"],
+["云水蓝", "yunshuilan", "#baccd9", "186,204,217", "35,13,13,0"],
+["羽扇豆蓝", "yushandoulan", "#619ac3", "97,154,195", "74,27,16,2"],
+["战舰灰", "zhanjianhui", "#495c69", "73,92,105", "77,50,41,31"],
+["晴山蓝", "qingshanlan", "#8fb2c9", "143,178,201", "55,20,18,1"],
+["睛蓝", "jinglan", "#5698c3", "86,152,195", "78,27,17,2"],
+["搪磁蓝", "tangcilan", "#11659a", "17,101,154", "100,53,21,6"],
+["潮蓝", "chaolan", "#2983bb", "41,131,187", "93,36,15,2"],
+["天蓝", "tianlan", "#1677b3", "22,119,179", "98,43,14,2"],
+["大理石灰", "dalishihui", "#c4cbcf", "196,203,207", "29,16,17,1"],
+["牵牛花蓝", "qianniuhualan", "#1177b0", "17,119,176", "98,42,16,3"],
+["宝石蓝", "baoshilan", "#2486b9", "36,134,185", "94,32,17,3"],
+["淡蓝灰", "danlanhui", "#5e7987", "94,121,135", "70,38,36,18"],
+["嫩灰", "nenhui", "#74787a", "116,120,122", "55,40,40,23"],
+["银鱼白", "yinyubai", "#cdd1d3", "205,209,211", "24,14,16,1"],
+["釉蓝", "youlan", "#1781b5", "23,129,181", "96,34,18,4"],
+["涧石蓝", "jianshilan", "#66a9c9", "102,169,201", "73,17,20,1"],
+["远天蓝", "yuantianlan", "#d0dfe6", "208,223,230", "25,6,10,0"],
+["云山蓝", "yunshanlan", "#2f90b9", "47,144,185", "91,24,22,4"],
+["秋波蓝", "qiubolan", "#8abcd1", "138,188,209", "59,12,19,0"],
+["井天蓝", "jingtianlan", "#c3d7df", "195,215,223", "32,8,13,0"],
+["鸢尾蓝", "yuanweilan", "#158bb8", "21,139,184", "95,25,20,4"],
+["云峰白", "yunfengbai", "#d8e3e7", "216,227,231", "21,6,10,0"],
+["星灰", "xinghui", "#b2bbbe", "178,187,190", "36,20,23,2"],
+["钴蓝", "gulan", "#1a94bc", "26,148,188", "94,16,23,3"],
+["碧青", "biqing", "#5cb3cc", "92,179,204", "77,7,24,0"],
+["苍蓝", "canglan", "#134857", "19,72,87", "100,52,46,43"],
+["深灰蓝", "shenhuilan", "#132c33", "19,44,51", "100,64,56,68"],
+["灰蓝", "huilan", "#21373d", "33,55,61", "94,58,54,60"],
+["湖水蓝", "hushuilan", "#b0d5df", "176,213,223", "43,4,16,0"],
+["海青", "haiqing", "#22a2c3", "34,162,195", "92,10,25,1"],
+["黄昏灰", "huanghunhui", "#474b4c", "71,75,76", "67,53,51,50"],
+["霁青", "jiqing", "#63bbd0", "99,187,208", "74,2,24,0"],
+["玉鈫蓝", "yuqinlan", "#126e82", "18,110,130", "99,33,38,21"],
+["胆矾蓝", "danfanlan", "#0f95b0", "15,149,176", "96,16,31,3"],
+["樫鸟蓝", "jianniaolan", "#1491a8", "20,145,168", "96,18,34,4"],
+["鸥蓝", "oulan", "#c7d2d4", "199,210,212", "28,12,17,0"],
+["翠蓝", "cuilan", "#1e9eb3", "30,158,179", "94,11,33,1"],
+["蜻蜓蓝", "qingtinglan", "#3b818c", "59,129,140", "89,27,41,13"],
+["孔雀蓝", "kongquelan", "#0eb0c9", "14,176,201", "92,0,28,0"],
+["蔚蓝", "weilan", "#29b7cb", "41,183,203", "89,0,29,0"],
+["瀑布蓝", "pubulan", "#51c4d3", "81,196,211", "79,0,27,0"],
+["闪蓝", "shanlan", "#7cabb1", "124,171,177", "64,18,32,2"],
+["甸子蓝", "dianzilan", "#10aec2", "16,174,194", "93,0,31,0"],
+["晚波蓝", "wanbolan", "#648e93", "100,142,147", "71,28,39,10"],
+["清水蓝", "qingshuilan", "#93d5dc", "147,213,220", "57,0,22,0"],
+["夏云灰", "xiayunhui", "#617172", "97,113,114", "65,40,44,26"],
+["海天蓝", "haitianlan", "#c6e6e8", "198,230,232", "33,0,14,0"],
+["虾壳青", "xiakeqing", "#869d9d", "134,157,157", "56,26,36,7"],
+["石绿", "shilv", "#57c3c2", "87,195,194", "78,36,0,0"],
+["穹灰", "qionghui", "#c4d7d6", "196,215,214", "32,7,18,0"],
+["美蝶绿", "meidielv", "#12aa9c", "18,170,156", "95,0,52,0"],
+["垩灰", "ehui", "#737c7b", "115,124,123", "57,37,42,21"],
+["蓝绿", "lanlv", "#12a182", "18,161,130", "98,2,64,0"],
+["竹绿", "zhulv", "#1ba784", "27,167,132", "96,0,64,0"],
+["亚丁绿", "yadinglv", "#428675", "66,134,117", "88,24,61,9"],
+["月影白", "yueyingbai", "#c0c4c3", "192,196,195", "29,18,21,2"],
+["海王绿", "haiwanglv", "#248067", "36,128,103", "99,23,70,10"],
+["深海绿", "shenhailv", "#1a3b32", "26,59,50", "98,46,73,63"],
+["绿灰", "lvhui", "#314a43", "49,74,67", "85,44,64,52"],
+["青矾绿", "qingfanlv", "#2c9678", "44,150,120", "96,12,66,2"],
+["苍绿", "canglv", "#223e36", "34,62,54", "93,46,70,61"],
+["飞泉绿", "feiquanlv", "#497568", "73,117,104", "82,32,60,20"],
+["莽丛绿", "mangconglv", "#141e1b", "20,30,27", "90,62,67,86"],
+["梧枝绿", "wuzhilv", "#69a794", "105,167,148", "74,14,51,1"],
+["铜绿", "tonglv", "#2bae85", "43,174,133", "92,0,64,0"],
+["草原远绿", "caoyuanyuanlv", "#9abeaf", "154,190,175", "52,11,37,0"],
+["蛙绿", "walv", "#45b787", "69,183,135", "86,0,63,0"],
+["浪花绿", "langhualv", "#92b3a5", "146,179,165", "55,16,40,1"],
+["苷蓝绿", "ganlanlv", "#1f2623", "31,38,35", "82,60,65,80"],
+["粉绿", "fenlv", "#83cbac", "131,203,172", "64,0,46,0"],
+["淡绿灰", "danlvhui", "#70887d", "112,136,125", "63,31,50,14"],
+["麦苗绿", "maimiaolv", "#55bb8a", "85,187,138", "81,0,62,0"],
+["翠绿", "cuilv", "#20a162", "32,161,98", "98,0,82,0"],
+["葱绿", "conglv", "#40a070", "64,160,112", "90,7,73,0"],
+["荷叶绿", "heyelv", "#1a6840", "26,104,64", "100,31,91,25"],
+["淡绿", "danlv", "#61ac85", "97,172,133", "78,6,62,0"],
+["田园绿", "tianyuanlv", "#68b88e", "104,184,142", "75,0,59,0"],
+["玉簪绿", "yuzanlv", "#a4cab6", "164,202,182", "49,5,37,0"],
+["蟾绿", "chanlv", "#3c9566", "60,149,102", "92,14,76,2"],
+["蔻梢绿", "koushaolv", "#5dbe8a", "93,190,138", "78,0,62,0"],
+["薄荷绿", "bohelv", "#207f4c", "32,127,76", "100,22,90,10"],
+["月白", "yuebai", "#eef7f2", "238,247,242", "11,0,8,0"],
+["蛋白石绿", "danbaishilv", "#579572", "87,149,114", "81,19,67,4"],
+["竹篁绿", "zhuhuanglv", "#b9dec9", "185,222,201", "40,0,30,0"],
+["孔雀绿", "kongquelv", "#229453", "34,148,83", "99,10,91,2"],
+["宫殿绿", "gongdianlv", "#20894d", "32,137,77", "100,17,92,5"],
+["云杉绿", "yunshanlv", "#15231b", "21,35,27", "91,60,76,83"],
+["毛绿", "maolv", "#66c18c", "102,193,140", "75,0,61,0"],
+["冰山蓝", "bingshanlan", "#a4aca7", "164,172,167", "40,24,32,6"],
+["明灰", "minghui", "#8a988e", "138,152,142", "52,28,42,10"],
+["明绿", "minglv", "#9eccab", "158,204,171", "53,1,44,0"],
+["松霜绿", "songshuanglv", "#83a78d", "131,167,141", "61,19,52,3"],
+["白屈菜绿", "baiqucailv", "#485b4d", "72,91,77", "74,42,65,40"],
+["狼烟灰", "langyanhui", "#5d655f", "93,101,95", "62,43,52,34"],
+["瓦松绿", "wasonglv", "#6e8b74", "110,139,116", "66,29,58,12"],
+["槲寄生绿", "hujishenglv", "#2b312c", "43,49,44", "76,56,75,72"],
+["淡翠绿", "dancuilv", "#c6dfc8", "198,223,200", "33,1,29,0"],
+["玉髓绿", "yusuilv", "#41b349", "65,179,73", "89,0,96,0"],
+["鲜绿", "xianlv", "#43b244", "67,178,68", "88,0,99,0"],
+["油绿", "youlv", "#253d24", "37,61,36", "84,64,94,45"],
+["宝石绿", "baoshilv", "#41ae3c", "65,174,60", "90,0,100,0"],
+["嘉陵水绿", "jialingshuilv", "#add5a2", "173,213,162", "47,0,49,0"],
+["田螺绿", "tianluolv", "#5e665b", "94,102,91", "62,42,56,34"],
+["水绿", "shuilv", "#8cc269", "140,194,105", "62,0,76,0"],
+["鹦鹉绿", "yingwulv", "#5bae23", "91,174,35", "81,0,100,0"],
+["艾背绿", "aibeilv", "#dfecd5", "223,236,213", "20,1,23,0"],
+["艾绿", "ailv", "#cad3c3", "202,211,195", "27,11,27,1"],
+["镍灰", "niehui", "#9fa39a", "159,163,154", "40,27,36,8"],
+["橄榄石绿", "ganlanshilv", "#b2cf87", "178,207,135", "44,3,61,0"],
+["芽绿", "yalv", "#96c24e", "150,194,78", "58,1,88,0"],
+["嫩菊绿", "nenjulv", "#f0f5e5", "240,245,229", "9,1,14,0"],
+["芦苇绿", "luweilv", "#b7d07a", "183,208,122", "42,3,67,0"],
+["姚黄", "yaohuang", "#d0deaa", "208,222,170", "28,4,44,0"],
+["蒽油绿", "enyoulv", "#373834", "55,56,52", "68,56,60,66"],
+["苹果绿", "pingguolv", "#bacf65", "186,207,101", "41,4,76,0"],
+["海沫绿", "haimolyu", "#e2e7bf", "226,231,191", "18,4,33,0"],
+["橄榄黄绿", "ganlanhuanglv", "#bec936", "190,201,54", "38,8,94,1"],
+["槐花黄绿", "huaihuahuanglv", "#d2d97a", "210,217,122", "28,6,66,0"],
+["蝶黄", "diehuang", "#e2d849", "226,216,73", "19,9,84,1"],
+["象牙白", "xiangyabai", "#fffef8", "255,254,248", "0,1,4,0"],
+["橄榄绿", "ganlanlv", "#5e5314", "94,83,20", "50,50,10,48"],
+["雪白", "xuebai", "#fffef9", "255,254,249", "0,1,3,0"],
+["淡灰绿", "danhuilv", "#ad9e5f", "173,158,85", "30,30,70,12"],
+["佛手黄", "foshouhuang", "#fed71a", "254,215,26", "1,18,94,0"],
+["乳白", "rubai", "#f9f4dc", "249,244,220", "4,5,18,0"],
+["香蕉黄", "xiangjiaohuang", "#e4bf11", "228,191,17", "11,25,99,1"],
+["新禾绿", "xinhelv", "#d2b116", "210,177,22", "17,29,100,4"],
+["油菜花黄", "youcaihuahuang", "#fbda41", "251,218,65", "2,16,84,0"],
+["秋葵黄", "qiukuihuang", "#eed045", "238,208,69", "8,19,84,1"],
+["柚黄", "youhuang", "#f1ca17", "241,202,23", "6,22,92,0"],
+["草黄", "caohuang", "#d2b42c", "210,180,44", "17,27,94,4"],
+["硫华黄", "liuhuahuang", "#f2ce2b", "242,206,43", "6,20,92,1"],
+["姜黄", "jianghuang", "#e2c027", "226,192,39", "12,24,95,2"],
+["潭水绿", "tanshuilv", "#645822", "100,88,34", "48,48,100,45"],
+["金瓜黄", "jinguahuang", "#fcd217", "252,210,23", "0,20,95,0"],
+["麦秆黄", "maiganhuang", "#f8df70", "248,223,112", "5,14,68,1"],
+["蒿黄", "haohuang", "#dfc243", "223,194,67", "14,22,85,2"],
+["茉莉黄", "molihuang", "#f8df72", "248,223,114", "4,13,67,0"],
+["藤黄", "tenghuang", "#ffd111", "254,209,16", "0,21,94,0"],
+["芒果黄", "mangguohuang", "#ddc871", "221,200,113", "15,20,66,2"],
+["海参灰", "haishenhui", "#fffefa", "255,254,250", "69,64,52,59"],
+["碧螺春绿", "biluochunlv", "#867018", "134,112,24", "36,42,100,30"],
+["苔绿", "tailv", "#887322", "136,115,34", "36,42,100,29"],
+["柠檬黄", "ningmenghuang", "#fcd337", "252,211,55", "0,20,87,0"],
+["草灰绿", "caohuilv", "#8e804b", "142,128,75", "38,38,76,24"],
+["向日葵黄", "xiangrikuihuang", "#fecc11", "254,204,17", "0,24,94,0"],
+["素馨黄", "suxinhuang", "#fccb16", "252,203,22", "0,24,94,0"],
+["乳鸭黄", "ruyahuang", "#ffc90c", "255,201,12", "0,26,94,0"],
+["月灰", "yuehui", "#b7ae8f", "183,174,143", "28,26,45,7"],
+["葵扇黄", "kuishanhuang", "#f8d86a", "248,216,106", "3,17,69,0"],
+["大豆黄", "dadouhuang", "#fbcd31", "251,205,49", "0,23,88,0"],
+["金盏黄", "jinzhanhuang", "#fcc307", "252,195,7", "0,29,95,0"],
+["菊蕾白", "juleibai", "#e9ddb6", "233,221,182", "10,13,35,1"],
+["黄连黄", "huanglianhuang", "#fcc515", "252,197,21", "0,28,94,0"],
+["杏仁黄", "xingrenhuang", "#f7e8aa", "249,236,195", "3,8,30,0"],
+["谷黄", "guhuang", "#e8b004", "232,176,4", "5,35,99,0"],
+["木瓜黄", "muguahuang", "#f9c116", "249,193,22", "0,30,95,0"],
+["淡茧黄", "danjianhuang", "#f9d770", "249,215,112", "1,19,66,0"],
+["雅梨黄", "yalihuang", "#fbc82f", "251,200,47", "0,27,88,0"],
+["银白", "yinbai", "#f1f0ed", "241,240,237", "7,5,7,0"],
+["棕榈绿", "zonglvlv", "#5b4913", "91,73,19", "45,55,100,54"],
+["鹦鹉冠黄", "yingwuguanhuang", "#f6c430", "246,196,48", "1,28,89,0"],
+["枯绿", "kulv", "#b78d12", "183,141,18", "21,43,100,11"],
+["浅烙黄", "qianlaohuang", "#f9bd10", "249,189,16", "0,32,95,0"],
+["淡密黄", "danmihuang", "#f9d367", "249,211,103", "1,21,70,0"],
+["芥黄", "jiehuang", "#d9a40e", "217,164,14", "11,39,100,2"],
+["栀子黄", "zhizihuang", "#ebb10d", "235,177,13", "3,36,99,0"],
+["暗海水绿", "anhaishuilv", "#584717", "88,71,23", "45,56,100,56"],
+["篾黄", "miehuang", "#f7de98", "247,222,152", "3,16,50,0"],
+["蚌肉白", "bangroubai", "#f9f1db", "249,241,219", "2,6,18,0"],
+["炒米黄", "chaomihuang", "#f4ce69", "244,206,105", "3,23,69,0"],
+["琥珀黄", "hupohuang", "#feba07", "254,186,7", "0,34,93,0"],
+["灰绿", "huilv", "#8a6913", "138,105,19", "31,51,100,30"],
+["粽叶绿", "zongyelv", "#876818", "135,104,24", "32,50,100,31"],
+["尘灰", "chenhui", "#b6a476", "182,164,118", "26,31,57,10"],
+["鼬黄", "youhuang", "#fcb70a", "252,183,10", "0,35,94,0"],
+["象牙黄", "xiangyahuang", "#f0d695", "240,214,149", "5,19,50,0"],
+["鲛青", "jiaoqing", "#87723e", "135,114,62", "35,44,80,30"],
+["豆汁黄", "douzhihuang", "#f8e8c1", "248,232,193", "3,10,31,0"],
+["土黄", "tuhuang", "#d6a01d", "214,160,29", "12,41,98,2"],
+["香水玫瑰黄", "xiangshuimeiguihuang", "#f7da94", "247,218,148", "1,17,50,0"],
+["虎皮黄", "hupihuang", "#eaad1a", "234,173,26", "3,38,97,0"],
+["鸡蛋黄", "jidanhuang", "#fbb612", "251,182,18", "0,36,93,0"],
+["银鼠灰", "yinshuhui", "#b5aa90", "181,170,144", "28,27,43,8"],
+["鱼肚白", "yudubai", "#f7f4ed", "247,244,237", "4,4,8,0"],
+["初熟杏黄", "chushuxinghuang", "#f8bc31", "248,188,49", "0,33,83,0"],
+["山鸡黄", "shanjihuang", "#b78b26", "183,139,38", "21,44,97,11"],
+["莲子白", "lianzibai", "#e5d3aa", "229,211,170", "11,18,39,1"],
+["蟹壳灰", "xiekehui", "#695e45", "105,94,69", "46,47,69,42"],
+["沙石黄", "shashihuang", "#e5b751", "229,183,81", "7,32,78,1"],
+["甘草黄", "gancaohuang", "#f3bf4c", "243,191,76", "1,31,79,0"],
+["燕羽灰", "yanyuhui", "#685e48", "104,94,72", "47,47,65,42"],
+["鹅掌黄", "ezhanghuang", "#fbb929", "251,185,41", "0,35,89,0"],
+["麦芽糖黄", "maiyatanghuang", "#f9d27d", "249,210,125", "0,23,59,0"],
+["浅驼色", "qiantuose", "#e2c17c", "226,193,124", "10,27,59,1"],
+["百灵鸟灰", "bailingniaohui", "#b4a992", "180,169,146", "28,28,41,9"],
+["酪黄", "laohuang", "#f6dead", "246,222,173", "2,16,39,0"],
+["荔肉白", "liroubai", "#f2e6ce", "242,230,206", "5,11,22,0"],
+["淡肉色", "danrouse", "#f8e0b0", "248,224,176", "1,15,38,0"],
+["河豚灰", "hetunhui", "#393733", "57,55,51", "64,57,60,67"],
+["蜴蜊绿", "yililv", "#835e1d", "131,94,29", "31,57,100,33"],
+["汉白玉", "hanbaiyu", "#f8f4ed", "248,244,237", "3,5,8,0"],
+["橙皮黄", "chengpihuang", "#fca104", "252,161,4", "0,47,92,0"],
+["莱阳梨黄", "laiyanglihuang", "#815f25", "129,95,37", "32,56,96,34"],
+["枇杷黄", "pipahuang", "#fca106", "252,161,6", "0,47,92,0"],
+["金叶黄", "jinyehuang", "#ffa60f", "255,166,15", "0,44,91,0"],
+["苍黄", "canghuang", "#806332", "128,99,50", "34,52,85,35"],
+["粉白", "fenbai", "#fbf2e3", "251,242,227", "1,7,13,0"],
+["淡橘橙", "danjucheng", "#fba414", "251,164,20", "0,45,92,0"],
+["珍珠灰", "zhenzhuhui", "#e4dfd7", "228,223,215", "12,12,16,0"],
+["龟背黄", "guibeihuang", "#826b48", "130,107,72", "35,47,71,33"],
+["浅灰", "qianhui", "#dad4cb", "218,212,203", "16,15,20,1"],
+["铅灰", "qianhui", "#bbb5ac", "187,181,172", "28,5,30,5"],
+["中灰", "zhonghui", "#a49c93", "164,156,147", "35,33,38,4"],
+["雄黄", "xionghuang", "#ff9900", "255,153,0", "0,51,91,0"],
+["蜜黄", "mihuang", "#fbb957", "251,185,87", "0,36,72,0"],
+["风帆黄", "fengfanhuang", "#dc9123", "220,145,35", "6,51,95,1"],
+["桂皮淡棕", "guipidanzong", "#c09351", "192,147,81", "19,44,75,7"],
+["金莺黄", "jinyinghuang", "#f4a83a", "244,168,58", "0,43,82,0"],
+["肉色", "rouse", "#f7c173", "247,193,115", "0,32,52,0"],
+["凋叶棕", "diaoyezong", "#e7a23f", "231,162,63", "2,44,83,0"],
+["古铜绿", "gutonglv", "#533c1b", "83,60,27", "42,64,94,60"],
+["落英淡粉", "luoyingdanfen", "#f9e8d0", "249,232,208", "1,12,22,0"],
+["软木黄", "ruanmuhuang", "#de9e44", "222,158,68", "7,45,82,1"],
+["瓜瓤粉", "guarangfen", "#f9cb8b", "249,203,139", "0,27,51,0"],
+["榴萼黄", "liuehuang", "#f9a633", "249,166,51", "0,44,84,0"],
+["玳瑁黄", "daimaohuang", "#daa45a", "218,164,90", "10,41,72,1"],
+["焦茶绿", "jiaochalv", "#553b18", "85,59,24", "41,66,94,60"],
+["蟹壳绿", "xiekelv", "#513c20", "81,60,32", "43,63,88,61"],
+["山鸡褐", "shanjihe", "#986524", "152,101,36", "27,60,97,21"],
+["猴毛灰", "houmaohui", "#97846c", "151,132,108", "32,40,53,22"],
+["鹿角棕", "lujiaozong", "#e3bd8d", "227,189,141", "8,31,50,1"],
+["淡松烟", "dansongyan", "#4d4030", "77,64,48", "48,58,70,62"],
+["万寿菊黄", "wanshoujuhuang", "#fb8b05", "251,139,5", "0,56,91,0"],
+["蛋壳黄", "dankehuang", "#f8c387", "248,195,135", "0,32,52,0"],
+["杏黄", "xinghuang", "#f28e16", "250,142,22", "0,54,92,0"],
+["橄榄灰", "ganlanhui", "#503e2a", "80,62,42", "44,61,76,62"],
+["鹤灰", "hehui", "#4a4035", "74,64,53", "52,56,64,62"],
+["玛瑙灰", "manaohui", "#cfccc9", "207,204,201", "21,17,19,1"],
+["淡银灰", "danyinhui", "#c1b2a3", "193,178,163", "22,28,34,6"],
+["瓦灰", "wahui", "#867e76", "134,126,118", "42,40,43,23"],
+["夜灰", "yehui", "#847c74", "132,124,116", "43,40,44,42"],
+["北瓜黄", "beiguahuang", "#fc8c23", "252,140,35", "0,56,87,0"],
+["荷花白", "hehuabai", "#fbecde", "251,236,222", "0,10,14,0"],
+["松鼠灰", "songshuhui", "#4f4032", "79,64,50", "46,59,68,61"],
+["淡米粉", "danmifen", "#fbeee2", "251,238,226", "0,9,12,0"],
+["深灰", "shenhui", "#81776e", "129,119,110", "42,42,46,27"],
+["海鸥灰", "haiouhui", "#9a8878", "154,136,120", "42,40,46,20"],
+["茶褐", "chahe", "#5d3d21", "93,61,33", "38,69,90,54"],
+["驼色", "tuose", "#66462a", "102,70,42", "37,65,84,49"],
+["银灰", "yinhui", "#918072", "145,128,114", "34,42,46,23"],
+["鹿皮褐", "lupihe", "#d99156", "217,145,86", "7,52,71,1"],
+["槟榔综", "binglangzong", "#c1651a", "193,101,26", "14,69,100,4"],
+["晓灰", "xiaohui", "#d4c4b7", "212,196,183", "16,23,27,2"],
+["淡赭", "danzhe", "#be7e4a", "190,126,74", "18,57,76,6"],
+["古铜褐", "gutonghe", "#5c3719", "92,55,25", "37,74,96,55"],
+["麂棕", "jizong", "#de7622", "222,118,34", "0,64,93,0"],
+["醉瓜肉", "zuiguarou", "#db8540", "219,133,64", "4,57,82,1"],
+["雁灰", "yanhui", "#80766e", "128,118,110", "42,42,45,27"],
+["鲑鱼红", "guiyuhong", "#f09c5a", "240,156,90", "0,50,68,0"],
+["橘橙", "jucheng", "#f97d1c", "249,125,28", "0,62,88,0"],
+["金黄", "jinhuang", "#f26b1f", "242,123,31", "5,69,87,0"],
+["玫瑰粉", "meiguifen", "#f8b37f", "248,179,127", "0,40,52,0"],
+["美人焦橙", "meirenjiaocheng", "#fa7e23", "250,126,35", "0,62,85,0"],
+["米色", "mise", "#f9e9cd", "249,223,205", "1,11,24,0"],
+["蛛网灰", "zhuwanghui", "#b7a091", "183,160,145", "23,35,38,10"],
+["淡咖啡", "dankafei", "#945833", "148,88,51", "27,69,85,22"],
+["海螺橙", "hailuocheng", "#f0945d", "240,148,93", "0,53,65,0"],
+["岩石棕", "yanshizong", "#964d22", "150,77,34", "26,76,97,20"],
+["芒果棕", "mangguozong", "#954416", "149,68,22", "25,80,100,20"],
+["陶瓷红", "taocihong", "#e16723", "225,103,35", "0,70,91,0"],
+["菠萝红", "boluohong", "#fc7930", "252,121,48", "0,65,79,0"],
+["余烬红", "yujinhong", "#cf7543", "207,117,67", "9,64,78,1"],
+["金莲花橙", "jinlianhuacheng", "#f86b1d", "248,107,29", "0,69,86,0"],
+["火砖红", "huozhuanhong", "#cd6227", "205,98,39", "8,72,93,1"],
+["初桃粉红", "chutaofenhong", "#f6dcce", "246,220,206", "0,19,19,0"],
+["铁棕", "tiezong", "#d85916", "216,89,22", "0,76,97,0"],
+["介壳淡粉红", "jieqiaodanfenhong", "#f7cfba", "247,207,186", "0,27,27,0"],
+["蟹壳红", "xiekehong", "#f27635", "242,118,53", "0,65,80,0"],
+["金驼", "jintuo", "#e46828", "228,104,40", "0,70,87,0"],
+["燕颔红", "yanhanhong", "#fc6315", "252,99,21", "0,72,86,0"],
+["淡可可棕", "dankekezong", "#b7511d", "183,81,29", "16,77,100,6"],
+["晨曦红", "chenxihong", "#ea8958", "234,137,88", "0,58,67,0"],
+["玉粉红", "yufenhong", "#e8b49a", "232,180,154", "3,38,39,0"],
+["野蔷薇红", "yeqiangweihong", "#fb9968", "251,153,104", "0,53,59,0"],
+["藕荷", "ouhe", "#edc3ae", "237,195,174", "2,31,31,0"],
+["长石灰", "changshihui", "#363433", "54,52,51", "67,60,57,68"],
+["中红灰", "zhonghonghui", "#8b614d", "139,97,77", "31,63,66,31"],
+["火泥棕", "huonizong", "#aa6a4c", "170,106,76", "22,64,71,12"],
+["绀红", "ganhong", "#a6522c", "166,82,44", "20,76,92,9"],
+["莓酱红", "meijianghong", "#fa5d19", "250,93,25", "0,74,85,0"],
+["丁香棕", "dingxiangzong", "#71361d", "113,54,29", "32,83,96,41"],
+["淡玫瑰灰", "danmeiguihui", "#b89485", "184,148,133", "21,43,43,9"],
+["瓜瓤红", "guaranghong", "#f68c60", "246,140,96", "0,58,61,0"],
+["淡藏花红", "dancanghuahong", "#f6ad8f", "246,173,143", "0,43,43,0"],
+["筍皮棕", "sunpizong", "#732e12", "115,46,18", "30,89,100,39"],
+["润红", "runhong", "#f7cdbc", "247,205,188", "0,28,25,0"],
+["龙睛鱼红", "longjingyuhong", "#ef632b", "239,99,43", "0,72,82,0"],
+["淡土黄", "dantuhuang", "#8c4b31", "140,75,49", "28,76,82,26"],
+["珠母灰", "zhumuhui", "#64483d", "100,72,61", "38,63,63,50"],
+["芙蓉红", "furonghong", "#f9723d", "249,114,61", "0,67,74,0"],
+["落霞红", "luoxiahong", "#cf4813", "207,72,19", "4,82,99,0"],
+["法螺红", "faluohong", "#ee8055", "238,128,85", "0,62,66,0"],
+["草珠红", "caozhuhong", "#f8ebe6", "248,235,230", "1,11,9,0"],
+["咖啡", "kafei", "#753117", "117,49,23", "30,87,100,38"],
+["中灰驼", "zhonghuituo", "#603d30", "96,61,48", "37,72,72,52"],
+["椰壳棕", "yekezong", "#883a1e", "136,58,30", "27,85,98,27"],
+["蟹蝥红", "xiemaohong", "#b14b28", "177,75,40", "18,80,92,7"],
+["淡豆沙", "dandousha", "#873d24", "135,61,36", "28,83,92,28"],
+["淡桃红", "dantaohong", "#f6cec1", "246,206,193", "0,28,22,0"],
+["淡铁灰", "dantiehui", "#5b423a", "91,66,58", "40,64,61,56"],
+["石板灰", "shibanhui", "#624941", "98,73,65", "39,60,58,51"],
+["淡栗棕", "danlizong", "#673424", "103,52,36", "34,82,85,47"],
+["银朱", "yinzhu", "#f43e06", "244,62,6", "0,83,87,0"],
+["草莓红", "caomeihong", "#ef6f48", "239,111,72", "0,69,70,0"],
+["洋水仙红", "yangshuixianhong", "#f4c7ba", "244,199,186", "0,31,24,0"],
+["朱红", "zhuhong", "#ed5126", "237,81,38", "0,78,83,0"],
+["榴花红", "liuhuahong", "#f34718", "243,71,24", "0,80,85,0"],
+["柿红", "shihong", "#f2481b", "242,72,27", "0,80,85,0"],
+["可可棕", "kekezong", "#652b1c", "101,43,28", "33,89,92,48"],
+["淡罂粟红", "danyingsuhong", "#eea08c", "238,160,140", "0,49,41,0"],
+["大红", "dahong", "#f04b22", "240,75,34", "0,80,83,0"],
+["柞叶棕", "zhayezong", "#692a1b", "105,42,27", "32,90,95,45"],
+["蜻蜓红", "qingtinghong", "#f1441d", "241,68,29", "0,81,84,0"],
+["橡树棕", "xiangshuzong", "#773d31", "119,61,49", "31,79,77,37"],
+["颊红", "jiahong", "#eeaa9c", "238,170,156", "0,45,34,0"],
+["桃红", "taohong", "#f0ada0", "240,173,160", "0,44,32,0"],
+["火岩棕", "huoyanzong", "#863020", "134,48,32", "27,91,95,28"],
+["淡藤萝紫", "dantengluozi", "#f2e7e5", "242,231,229", "4,11,9,0"],
+["赭石", "zheshi", "#862617", "134,38,23", "27,96,100,27"],
+["铁水红", "tieshuihong", "#f5391c", "245,57,28", "0,84,82,0"],
+["胭脂红", "yanzhihong", "#f03f24", "240,63,36", "0,83,81,0"],
+["极光红", "jiguanghong", "#f33b1f", "243,59,31", "0,84,82,0"],
+["红汞红", "honggonghong", "#f23e23", "242,62,35", "0,83,81,0"],
+["萝卜红", "luobohong", "#f13c22", "241,60,34", "0,84,82,0"],
+["曲红", "quhong", "#f05a46", "240,90,70", "0,76,68,0"],
+["谷鞘红", "guqiaohong", "#f17666", "241,118,102", "0,67,55,0"],
+["苹果红", "pingguohong", "#f15642", "241,86,66", "0,77,69,0"],
+["桂红", "guihong", "#f25a47", "242,90,71", "0,76,67,0"],
+["粉红", "fenhong", "#f2b9b2", "242,185,178", "0,38,25,0"],
+["暗驼棕", "antuozong", "#592620", "89,38,32", "36,90,82,56"],
+["夕阳红", "xiyanghong", "#de2a18", "222,42,24", "0,90,90,0"],
+["樱桃红", "yingtaohong", "#ed3321", "237,51,33", "0,86,82,0"],
+["珊瑚红", "shanhuhong", "#f04a3a", "240,74,58", "0,80,72,0"],
+["火山棕", "huoshanzong", "#482522", "72,37,34", "41,84,71,67"],
+["栗棕", "lizong", "#5c1e19", "92,30,25", "34,98,91,53"],
+["鹤顶红", "hedinghong", "#d42517", "212,37,23", "0,92,95,0"],
+["舌红", "shehong", "#f19790", "241,151,144", "0,53,36,0"],
+["鹅血石红", "exueshihong", "#ab372f", "171,55,47", "19,89,85,9"],
+["酱棕", "jiangzong", "#5a1f1b", "90,31,27", "35,96,88,55"],
+["鱼鳃红", "yusaihong", "#ed3b2f", "237,59,47", "0,84,76,0"],
+["芦穗灰", "lusuihui", "#bdaead", "189,174,173", "25,31,26,5"],
+["丽春红", "lichunhong", "#eb261a", "235,38,26", "0,89,84,0"],
+["覆盆子红", "fupenzihong", "#ac1f18", "172,31,24", "17,98,100,8"],
+["海报灰", "haibaohui", "#483332", "72,51,50", "45,68,57,66"],
+["豆沙", "dousha", "#481e1c", "72,30,28", "40,92,78,66"],
+["榴子红", "liuzihong", "#f1908c", "241,144,140", "0,57,36,0"],
+["秋海棠红", "qiuhaitanghong", "#ec2b24", "236,43,36", "0,88,81,0"],
+["无花果红", "wuhuaguohong", "#efafad", "239,175,173", "0,43,24,0"],
+["淡绯", "danfei", "#f2cac9", "242,202,201", "0,29,16,0"],
+["玫瑰灰", "meiguihui", "#4b2e2b", "175,46,43", "41,76,64,65"],
+["淡菽红", "danshuhong", "#ed4845", "237,72,69", "0,81,66,0"],
+["枸枢红", "goushuhong", "#ed3333", "237,51,51", "0,86,74,0"],
+["貂紫", "diaozi", "#5d3131", "93,49,49", "36,81,64,54"],
+["蓝翠竹", "lancuizhu", "#4B8F8C", "75,143,140", "47,0,2,44"],
+["云青灰", "yunqinghui", "#8A9A9C", "138,154,156", "12,1,0,39"],
+["黑", "hei", "#000000", "0,0,0", "0,0,0,100"],
+["普鲁士蓝", "pulushilan", "#003152", "0,49,82", "100,40,0,68"],
+["山岚", "shanlan", "#B2C9B2", "178,201,178", "11,0,11,21"],
+["綟绶", "lishou", "#6B8E23", "107,142,35", "25,0,75,44"],
+["黛蓝", "dailan", "#2A3C5C", "42,60,92", "55,34,0,63"],
+["烟紫", "yanzi", "#704A70", "112,74,112", "0,34,0,56"],
+["暮山紫", "mushanzi", "#6e4d7e", "110,77,126", "13,39,0,51"],
+["月白天青", "yuebaitianqing", "#C6D7DB", "198,215,219", "10,2,0,14"],
+["翠微", "cuiwei", "#3CB371", "60,179,113", "66,0,37,30"],
+["紫云", "ziyun", "#A020F0", "160,32,240", "33,87,0,6"],
+["青霜", "qingshuang", "#4682b4", "70,130,180", "61,28,0,29"],
+["梅子青", "meiziqing", "#7BC092", "123,192,146", "36,0,24,25"],
+["火焰红", "huoyanhong", "#F4512C", "244,81,44", "0,67,82,4"],
+["琥珀", "hupo", "#CA6924", "202,105,36", "16,68,100,4"],
+["浅褐色", "qianhese", "#D2B48C", "210,180,140", "0,14,33,18"],
+["烟青", "yanqing", "#708090", "112,128,144", "22,11,0,44"],
+["苍碧", "cangbi", "#2A52BE", "42,82,190", "78,57,0,25"],
+["月华", "yuehua", "#E0FFFF", "224,255,255", "12,0,0,0"],
+["绫素白", "lingsubai", "#F8F3E6", "248,243,230", "0,2,7,3"],
+["墨韵黑", "moyunhei", "#2E2E2E", "46,46,46", "0,0,0,82"],
+["夜筵青", "yeyanqing", "#1D3F5A", "29,63,90", "68,30,0,65"],
+["霜白", "shuangbai", "#F2F3F4", "242,243,244", "1,0,0,4"],
+["秋香", "qiuxiang", "#C3B787", "195,183,135", "0,6,31,24"],
+["绯红", "feihong", "#E3256B", "227,37,107", "0,84,53,11"],
+["霞绯", "xiafei", "#FF6B6B", "255,107,107", "0,58,58,0"],
+["鸦青", "yaqing", "#424b50", "66,75,80", "18,6,0,69"],
+["玄黑", "xuanhei", "#0E100F", "14,16,15", "12,0,6,94"],
+["黛青", "daiqing", "#2A475F", "42,71,95", "56,25,0,63"],
+["缃绮", "xiangqi", "#F8C471", "248,196,113", "0,21,54,3"],
+["烟褐", "yanhe", "#8B6D5C", "139,109,92", "0,22,34,45"],
+["柳苍", "liucang", "#3E6A3D", "62,106,61", "41,0,42,58"],
+["蟹壳青", "xiekeqing", "#86A1A7", "134,161,167", "20,4,0,35"],
+["雪青", "xueqing", "#B0D8E8", "176,216,232", "24,7,0,9"],
+["云蓝", "yunlan", "#87CEEB", "135,206,235", "42,12,0,7"],
+["梅红", "meihong", "#B34B43", "179,75,67", "0,58,62,30"],
+["柳绿", "liulv", "#70C870", "112,200,112", "44,0,44,22"],
+["绀碧", "ganbi", "#4B6C8C", "75,108,140", "46,23,0,45"],
+["月蓝", "yuelan", "#6B8E99", "107,142,153", "30,7,0,40"],
+["霜蓝", "shuanglan", "#4A6FA6", "74,111,166", "55,33,0,35"],
+["松墨", "songmo", "#2E4B26", "46,75,38", "38,0,49,70"],
+["竹青", "zhuqing", "#00A86B", "0,168,107", "100,0,36,34"],
+["湖蓝", "hulan", "#66B7D0", "102,183,208", "51,12,0,18"],
+["潆青", "yingqing", "#6B8E9A", "107,142,154", "31,8,0,40"],
+["霜青", "shuangqing", "#7CB9A8", "124,185,168", "33,0,9,27"],
+["烟萦紫", "yanyingzi", "#8A4B9C", "138,75,156", "12,52,0,39"],
+["缥缃", "piaoxiang", "#A4C2A8", "164,194,168", "15,0,13,24"],
+["露碧", "lubi", "#A0D8D8", "160,216,216", "25,0,0,15"],
+["绀青", "ganqing", "#4F84FF", "79,132,255", "69,48,0,0"],
+["柳黄", "liuhuang", "#c9e079", "201,224,121", "10,0,46,12"],
+["槐黄", "huaihuang", "#D8C37C", "216,195,124", "0,10,43,15"],
+["缥色", "piaose", "#A8C9E4", "168,201,228", "26,12,0,11"],
+["松花", "songhua", "#B6D7A8", "182,215,168", "15,0,22,16"],
+["缥碧", "piaobi", "#7AB9C1", "122,185,193", "37,4,0,24"],
+["荷绿", "helv", "#4A7856", "74,120,86", "38,0,28,53"],
+["檀褐", "tanhe", "#8E443D", "142,68,61", "0,52,57,44"],
+["月魄", "yuepo", "#e0e7ef", "224,231,239", "6,3,0,6"],
+["滢蓝", "yinglan", "#8EC4E9", "142,196,233", "39,16,0,9"],
+["湖绿", "hulv", "#70C8A4", "112,200,164", "44,0,18,22"],
+["枫丹", "fengdan", "#C92B27", "201,43,39", "0,79,80,21"],
+["雾绡", "wuxiao", "#CDE8F9", "205,232,249", "18,7,0,2"],
+["樱粉", "yingfen", "#F7B7C5", "247,183,197", "0,26,20,4"],
+["霜紫", "shuangzi", "#B8A5D2", "184,165,210", "12,21,0,18"],
+["缥青", "piaoqing", "#2B5F7C", "43,95,124", "65,23,0,51"],
+["瑶碧", "yaobi", "#4B9CD3", "75,156,211", "64,26,0,17"],
+["墨玉", "moyu", "#2E4B3A", "46,75,58", "38,0,23,71"],
+["莹翠", "yingcui", "#3EB489", "62,180,137", "65,0,24,29"],
+["茜色", "qianse", "#FF4D4D", "255,77,77", "0,70,70,0"],
+["鹅黄", "ehuang", "#F2C867", "242,200,103", "5,25,65,0"],
+["霜华", "shuanghua", "#D0E7F9", "208,231,249", "16,7,0,2"],
+["粉色", "fense", "#FADADD", "250,218,221", "0,13,12,2"],
+["天青", "tianqing", "#6C9BCA", "108,155,202", "46,23,0,20"],
+["天水碧", "tianshuibi", "#AED9D4", "174,217,212", "20,0,2,15"],
+["檀色", "tanse", "#A65F2E", "166,95,46", "0,43,72,35"],
+["霜色", "shuangse", "#E8F4F8", "232,244,248", "7,2,0,2"],
+["橙色", "chengse", "#FF8C00", "255,140,0", "0,45,100,0"],
+["奶橙色", "naichengse", "#FFD8B3", "255,216,179", "0,15,30,0"],
+["黛绿", "dailv", "#3B7A57", "59,122,87", "52,0,29,52"],
+["勃艮第红", "bogendihong", "#6D0B1E", "109,11,30", "0,90,73,57"],
+["朱砂红", "zhushahong", "#D92121", "217,33,33", "0,85,85,15"],
+["朱墙", "zhuqiang", "#C41E3A", "196,30,58", "0,85,71,23"],
+["东方既白", "dongfangjibai", "#E6F2FF", "230,242,255", "10,5,0,0"],
+["藕丝", "ousi", "#D8B0C8", "216,176,200", "0,19,7,15"],
+["奶黄色", "naihuangse", "#F9E4A5", "249,228,165", "0,8,34,2"],
+["浅栗棕", "qianlizong", "#C8A58E", "200,165,142", "0,17,29,22"],
+["浅绛", "qianjiang", "#D9A594", "217,165,148", "0,24,32,15"],
+["缁", "zi", "#2C2C2C", "44,44,44", "0,0,0,83"],
+["緅", "zou", "#5C4A43", "92,74,67", "0,19,27,64"],
+["缊", "yun", "#C79A6A", "199,154,106", "0,23,47,22"],
+["青组缨", "qingzuying", "#3B7C7F", "59,124,127", "53,2,0,50"],
+["爵弁", "juebian", "#6B3E3C", "107,62,60", "0,42,44,58"],
+["玄色", "xuanse", "#1A1A1A", "26,26,26", "0,0,0,90"],
+["黛紫", "daizi", "#5D3A6F", "93,58,111", "16,47,0,56"],
+["浅肤色", "qianfuse", "#EBCDA8", "235,205,168", "0,13,28,8"],
+["海棠", "haitang", "#FF6F61", "255,111,97", "0,56,58,0"],
+["黛青山", "daiqingshan", "#2E5A6F", "46,90,111", "59,19,0,56"],
+["银红", "yinhong", "#C74A4D", "199,74,77", "0,63,61,22"],
+["蓝色", "lanse", "#4A8DDA", "74,141,218", "66,35,0,15"],
+["绛紫", "jiangzi", "#8E354A", "142,53,74", "0,63,48,44"],
+["醋", "cu", "#8A3A3A", "138,58,58", "0,58,58,46"],
+["玄青", "xuanqing", "#2B3A4F", "43,58,79", "45,27,0,69"],
+["霜叶红", "shuangyehong", "#C73B44", "199,59,68", "0,70,66,22"],
+["竹月", "zhuyue", "#BCE5D6", "188,229,214", "18,0,7,10"],
+["银褐", "yinhe", "#A88A6F", "168,138,111", "0,18,34,34"],
+["荞麦", "qiaomai", "#D2B89A", "210,184,154", "0,12,27,18"],
+["茶粉绿", "chafenlv", "#B8C7A0", "184,199,160", "8,0,20,22"],
+["长春花蓝", "changchunhualan", "#7EC0EE", "126,192,238", "47,19,0,7"],
+["青骊", "qingli", "#2E3439", "46,52,57", "19,9,0,78"],
+["荞麦棕", "qiaomaizong", "#8B6D47", "139,109,71", "0,22,49,45"],
+["纯衣", "chunyi", "#F5F3E9", "245,243,233", "0,1,5,4"],
+["緇", "zi", "#3B3131", "59,49,49", "0,17,17,77"],
+["纁裳", "xunchang", "#D46A6A", "212,106,106", "0,50,50,17"],
+["韎韐", "meige", "#A5441B", "165,68,27", "0,59,84,35"],
+["纁屦", "xunju", "#D47A5E", "212,122,94", "0,42,56,17"],
+["皮弁", "pibian", "#8B5D33", "139,93,51", "0,33,63,45"],
+["素衣", "suyi", "#F2F0E6", "242,240,230", "0,1,5,5"],
+["素积", "suji", "#D2C8BC", "210,200,188", "0,5,10,17"],
+["缁带", "zidai", "#2E2A2D", "46,42,45", "0,8,2,82"],
+["素鞸", "subi", "#D6C9B8", "214,201,184", "0,6,14,16"],
+["白屦", "baiju", "#F5F3E6", "245,243,230", "0,1,6,4"],
+["缁絇繶纯", "ziquyichun", "#2E2014", "46,32,20", "0,30,57,82"],
+["黄裳", "huangchang", "#F5D87E", "245,216,126", "0,0,0,0"],
+["青絇繶纯", "qingquyichun", "#3B7A5D", "59,122,93", "0,0,0,0"],
+["浅灰蓝", "qianhuilan", "#C2D1E0", "194,209,224", "13,7,0,12"],
+["官绿", "guanlv", "#7AA35A", "122,163,90", "25,0,45,36"],
+["明黄", "minghuang", "#FFD700", "255,215,0", "0,16,100,0"],
+["玉青", "yuqing", "#4A9D9C", "74,157,156", "53,0,1,38"],
+["暖灰", "nuanhui", "#B7A8A5", "183,168,165", "0,8,10,28"],
+["墨色", "mose", "#1D1B1C", "29,27,28", "0,6,3,88"],
+["宝蓝", "baolan", "#1a3e72", "26,62,114", "77,46,0,55"],
+["帝王紫", "diwangzi", "#7B3F61", "123,63,97", "0,49,21,52"],
+["暗金", "anjin", "#9C8B4D", "156,139,77", "0,11,51,39"],
+["灰橙色", "huichengse", "#C48A69", "196,138,105", "0,30,46,23"],
+["茜红", "qianhong", "#C70039", "199,0,57", "0,100,71,22"],
+["烟蓝", "yanlan", "#7BA4B8", "123,164,184", "33,11,0,28"],
+["落霞", "luoxia", "#FA7C5E", "250,124,94", "0,50,62,2"],
+["纁色", "xunse", "#D46D3A", "212,109,58", "0,48,73,17"],
+["緅色", "zouse", "#5C4033", "92,64,51", "0,30,44,64"],
+["雾霾蓝", "wumailan", "#7BA0A5", "123,160,165", "26,3,0,35"],
+["浅薄荷绿", "qianbohelv", "#B2F0D9", "178,240,217", "26,0,10,6"],
+["丁香紫", "dingxiangzi", "#C8A2C8", "200,162,200", "0,19,0,22"],
+["烟粉", "yanfen", "#E4B5C4", "228,181,196", "0,21,14,10"],
+["灰粉", "huifen", "#D8B0B0", "216,176,176", "0,19,19,15"],
+["棉花糖白", "mianhuatangbai", "#FFF8F0", "255,248,240", "0,3,6,0"],
+["金棕", "jinzong", "#b8860b", "184,134,11", "0,27,94,28"],
+["复方甘草", "fufanggancao", "#8B6E4F", "139,110,79", "0,21,43,45"],
+["天际灰", "tianjihui", "#C8D3D7", "200,211,215", "7,2,0,16"],
+["藕粉", "oufen", "#FEDBE1", "254,219,225", "0,14,11,0"],
+["紫藤萝", "zitengluo", "#9B8AE8", "155,138,232", "33,40,0,9"],
+["浅紫藤萝", "qianzitengluo", "#D1B3FF", "209,179,255", "18,30,0,0"],
+["粉紫藤萝", "fenzitengluo", "#D8B0D8", "216,176,216", "0,19,0,15"],
+["白雪藤", "baixueteng", "#E8F4F0", "232,244,240", "5,0,2,4"],
+["凝脂莲青", "ningzhilianqing", "#C6E3E1", "198,227,225", "13,0,1,11"],
+["焦绿", "jiaolv", "#3B5F3A", "59,95,58", "38,0,39,63"],
+["奶油白", "naiyoubai", "#FFF8E7", "255,248,231", "0,3,9,0"],
+["浅豆绿", "qiandoulv", "#B2C8A0", "178,200,160", "11,0,20,22"],
+["茉莉白", "molibai", "#F8F4E9", "248,244,233", "0,1,6,3"],
+["芝麻黑", "zhimahei", "#2E292B", "46,41,43", "0,11,7,82"],
+["流黄", "liuhuang", "#D4A017", "212,160,23", "0,24,89,17"],
+["柠檬绿", "ningmenglv", "#CCFF00", "204,255,0", "20,0,100,0"],
+["青绿", "qinglv", "#2E8B57", "46,139,87", "0,0,0,0"],
+["木色", "muse", "#8B4513", "139,69,19", "0,50,86,45"],
+["高级灰", "gaojihui", "#9C9CA4", "156,156,164", "5,5,0,36"],
+["云峰灰", "yunfenghui", "#C1C8D6", "193,200,214", "10,7,0,16"],
+["檀香紫", "tanxiangzi", "#8A6E8B", "138,110,139", "0,21,0,45"],
+["松烟墨", "songyanmo", "#3B3A3E", "59,58,62", "4,6,0,75"],
+["杏子", "xingzi", "#FDDA9F", "253,218,159", "0,14,37,1"],
+["霁蓝", "jilan", "#1E5A8F", "30,90,143", "79,37,0,44"],
+["靛蓝", "dianlan", "#4B0082", "75,0,130", "42,100,0,49"],
+["玫红色", "meihongse", "#FF007F", "255,0,127", "0,100,50,0"],
+["新绿", "xinlv", "#6CC788", "108,199,136", "46,0,32,22"],
+["杏子灰", "xingzihui", "#D9CBB8", "217,203,184", "0,6,15,15"],
+["玉色", "yuse", "#F0F8FF", "240,248,255", "6,3,0,0"],
+["霜地", "shuangdi", "#E2F0CB", "226,240,203", "6,0,15,6"],
+["黛绿色", "dailvse", "#3AB08C", "58,176,140", "67,0,20,31"],
+["茜裙", "qianqun", "#C75A6B", "199,90,107", "0,55,46,22"],
+["黛色", "daise", "#3B4F5C", "59,79,92", "36,14,0,64"],
+["松花绿", "songhualv", "#A0D6B4", "160,214,180", "25,0,16,16"],
+["灰色", "huise", "#8A8A8A", "138,138,138", "0,0,0,46"],
+["白色", "baise", "#F8F8F8", "248,248,248", "0,0,0,3"],
+["马尔斯绿", "maersilv", "#3A5F4B", "58,95,75", "39,0,21,63"],
+["藕丝秋半", "ousiqiuban", "#D9C6B0", "217,198,176", "0,9,19,15"],
+["浅蓝", "qianlan", "#B0D4E3", "176,212,227", "23,7,0,11"],
+["湘蓝", "xianglan", "#4A76A8", "74,118,168", "56,30,0,34"],
+["荔色", "lise", "#F57C00", "245,124,0", "0,49,100,4"],
+["鸦青色", "yaqingse", "#2F4F4F", "47,79,79", "40,0,0,69"],
+["杏粉", "xingfen", "#F0D9D0", "240,217,208", "0,10,13,6"],
+["浅杏粉", "qianxingfen", "#F5E6E0", "245,230,224", "0,6,9,4"],
+["米白", "mibai", "#F5F0E6", "245,240,230", "0,2,6,4"],
+["梨花白", "lihuabai", "#F8F5F0", "248,245,240", "0,1,3,3"],
+["荠麦绿", "qimailv", "#8DB67A", "141,182,122", "23,0,33,29"],
+["蓼蓝青", "liaolanqing", "#2E5A88", "46,90,136", "66,34,0,47"],
+["胭脂泪", "yanzhilei", "#9D4E5C", "157,78,92", "0,50,41,38"],
+["藕荷色", "ouhese", "#B5A0C2", "181,160,194", "15,25,0,24"],
+["杏子阴", "xingziyin", "#B8A996", "184,169,150", "0,8,18,28"],
+["浅苋菜紫", "qianxiancaizi", "#D8BFD8", "216,191,216", "0,12,0,15"],
+["社红配", "shehongpei", "#C83737", "200,55,55", "0,72,72,22"],
+["猩红", "xinghong", "#BC1E46", "188,30,70", "0,84,63,26"],
+["莺儿", "yinger", "#A8D865", "168,216,101", "22,0,53,15"],
+["青蓝", "qinglan", "#2A5C82", "42,92,130", "68,29,0,49"],
+["苍筤", "canglang", "#2E5D4A", "46,93,74", "51,0,20,64"],
+["汉绣绿", "hanxiulv", "#2E7D32", "46,125,50", "63,0,60,51"],
+["汉绣红", "hanxiuhong", "#9E2F2F", "158,47,47", "0,70,70,38"],
+["藕丝秋", "ousiqiu", "#D9C6B3", "217,198,179", "0,9,18,15"],
+["墨绿", "molv", "#1A3B2E", "26,59,46", "82,0,22,77"],
+["荼蘼白", "tumibai", "#F8F4F0", "248,244,240", "0,2,4,3"],
+["石青", "shiqing", "#2E5D8C", "46,93,140", "67,34,0,45"],
+["鎏金", "liujin", "#D4AF37", "212,175,55", "0,17,74,17"],
+["墨黑", "mohei", "#0F1A20", "15,26,32", "53,19,0,87"],
+["藕丝秋色", "ousiqiuse", "#DCC6B5", "220,198,181", "0,10,18,14"],
+["胭脂晕", "yanzhiyun", "#C94A5E", "201,74,94", "0,63,53,21"],
+["鸦黄", "yahuang", "#E6C24D", "230,194,77", "0,16,67,10"],
+["翠青", "cuiqing", "#2AAE6F", "42,174,111", "76,0,36,32"],
+["青黛", "qingdai", "#1A3A5F", "26,58,95", "73,39,0,63"],
+["深绿", "shenlv", "#0D5E3A", "13,94,58", "86,0,38,63"],
+["檀心", "tanxin", "#8C5E53", "140,94,83", "0,33,41,45"],
+["绛缨", "jiangying", "#9E3B3B", "158,59,59", "0,63,63,38"],
+["黄棕色", "huangzongse", "#C19A6B", "193,154,107", "0,20,44,24"],
+["藕色", "ouse", "#D9C7B8", "217,199,184", "0,8,15,15"],
+["石榴裙", "shiliuqun", "#E63946", "230,57,70", "0,75,69,10"],
+["烟雨青", "yanyuqing", "#6A8D8C", "106,141,140", "25,0,1,45"],
+["墨蓝", "molan", "#1E2D4C", "30,45,76", "61,41,0,70"],
+["沙色", "shase", "#D9C7A9", "217,199,169", "0,8,22,15"],
+["薰衣草紫", "xunyicaozi", "#B57EDC", "181,126,220", "18,43,0,14"]
         ];
 
-        // ---- 颜色工具函数 ----
+        // ---- 颜色空间与计算工具函数 ----
         function hexToRgb(hex) {
             hex = hex.replace('#', '');
             if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
             const n = parseInt(hex, 16);
             return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
         }
+
         function rgbToHex(r, g, b) {
-            const to = c => Math.round(c).toString(16).padStart(2, '0');
+            const to = c => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, '0');
             return '#' + to(r) + to(g) + to(b);
         }
+
         function rgbToHsl(r, g, b) {
             r /= 255; g /= 255; b /= 255;
             const max = Math.max(r, g, b), min = Math.min(r, g, b);
             let h = 0, s = 0, l = (max + min) / 2;
             const d = max - min;
             if (d !== 0) {
-                s = d / (1 - Math.abs(2 * l - 1));
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
                 switch (max) {
-                    case r: h = ((g - b) / d) % 6; break;
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) % 6; break;
                     case g: h = (b - r) / d + 2; break;
                     case b: h = (r - g) / d + 4; break;
                 }
                 h *= 60;
-                if (h < 0) h += 360;
             }
             return { h, s, l };
         }
+
         function hslToRgb(h, s, l) {
             h = ((h % 360) + 360) % 360;
             const c = (1 - Math.abs(2 * l - 1)) * s;
@@ -697,27 +1039,30 @@
             let r = 0, g = 0, b = 0;
             if (h < 60) { r = c; g = x; }
             else if (h < 120) { r = x; g = c; }
-            else if (h < 180) { g = c; b = x; }
+            else if (h < 180) { r = g; b = x; }
             else if (h < 240) { g = x; b = c; }
             else if (h < 300) { r = x; b = c; }
             else { r = c; b = x; }
             return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
         }
-        // 明度（简单感知亮度），用于决定文字颜色
+
         function brightness(hex) {
             const [r, g, b] = hexToRgb(hex);
             return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
         }
+
         function textFor(hex) {
             return brightness(hex) > 0.5 ? '#4c1f24' : '#fbecde';
         }
+
         function mix(hex1, hex2, t) {
             const a = hexToRgb(hex1), b = hexToRgb(hex2);
             return rgbToHex(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t);
         }
+
         function clamp01(v) { return Math.max(0, Math.min(1, v)); }
 
-        // 感知色彩距离（CIE Lab ΔE），用于在颜色列表里查找最接近的颜色
+        // CIE Lab 色彩空间转换（用于更精确的感知色彩距离）
         function rgbToLab(r, g, b) {
             const lin = c => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
             const rr = lin(r / 255), gg = lin(g / 255), bb = lin(b / 255);
@@ -728,57 +1073,112 @@
             const fx = f(X / 0.95047), fy = f(Y / 1.0), fz = f(Z / 1.08883);
             return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
         }
-        function deltaE(hex1, hex2) {
-            const a = rgbToLab(...hexToRgb(hex1));
-            const b = rgbToLab(...hexToRgb(hex2));
-            const dl = a[0] - b[0], da = a[1] - b[1], db = a[2] - b[2];
-            return Math.sqrt(dl * dl + da * da + db * db);
-        }
-        function nearestColorIndex(hex) {
-            let best = 0, bestD = Infinity;
-            for (let i = 0; i < COLORS.length; i++) {
-                const d = deltaE(hex, COLORS[i][2]);
-                if (d < bestD) { bestD = d; best = i; }
-            }
-            return best;
+
+        // 色系智能分类
+        function getColorCategory(hex) {
+            const [r, g, b] = hexToRgb(hex);
+            const { h, s, l } = rgbToHsl(r, g, b);
+            if (l < 0.13) return 'neutral';
+            if (l > 0.88 && s < 0.20) return 'neutral';
+            if (s < 0.12) return 'neutral';
+            if (h >= 15 && h <= 50 && s < 0.65 && l < 0.48) return 'brown';
+            if (h >= 345 || h < 20) return 'red';
+            if (h >= 20 && h < 70) return 'yellow';
+            if (h >= 70 && h < 165) return 'green';
+            if (h >= 165 && h < 260) return 'blue';
+            if (h >= 260 && h < 345) return 'purple';
+            return 'neutral';
         }
 
-        // ---- 配色方案生成 ----
+        // 预计算全部 751 个颜色的特征数据，提升排序与检索性能
+        const COLOR_METAS = COLORS.map((c, i) => {
+            const [name, pinyin, hex, rgb, cmyk] = c;
+            const [r, g, b] = hexToRgb(hex);
+            const hsl = rgbToHsl(r, g, b);
+            const lab = rgbToLab(r, g, b);
+            const bVal = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            const cat = getColorCategory(hex);
+            return {
+                index: i,
+                name,
+                pinyin,
+                hex,
+                rgb,
+                cmyk,
+                r, g, b,
+                hsl,
+                lab,
+                brightness: bVal,
+                category: cat
+            };
+        });
+
+        // 快速在 751 色库中查找感知距离最近的传统色索引
+        function nearestColorIndex(targetHex) {
+            const [tr, tg, tb] = hexToRgb(targetHex);
+            const [tl, ta, tbLab] = rgbToLab(tr, tg, tb);
+            let bestIdx = 0, bestDist = Infinity;
+            for (let i = 0; i < COLOR_METAS.length; i++) {
+                const [l, a, bVal] = COLOR_METAS[i].lab;
+                const dl = tl - l, da = ta - a, db = tbLab - bVal;
+                const dist = dl * dl + da * da + db * db;
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    bestIdx = i;
+                }
+            }
+            return bestIdx;
+        }
+
+        // ---- 配色方案生成算法 ----
         function makePalette(hex) {
             const [r, g, b] = hexToRgb(hex);
             const { h, s, l } = rgbToHsl(r, g, b);
-            const hslHex = (H, S, L) => { const [rr, gg, bb] = hslToRgb(H, S, L); return rgbToHex(rr, gg, bb); };
-            const gen = items => items.map(c => ({ name: '', hex: hslHex(c.h, c.s, c.l) }));
-            const nearest = items => items.map(c => {
-                const i = nearestColorIndex(hslHex(c.h, c.s, c.l));
-                return { name: COLORS[i][0], hex: COLORS[i][2] };
-            });
-            const nearestOf = c => {
-                const i = nearestColorIndex(hslHex(c.h, c.s, c.l));
-                return { name: COLORS[i][0], hex: COLORS[i][2] };
+            const hslHex = (H, S, L) => {
+                const [rr, gg, bb] = hslToRgb(H, S, L);
+                return rgbToHex(rr, gg, bb);
             };
 
-            const mono = [0.25, 0.12, 0, -0.12, -0.25].map(dl => ({ h, s, l: clamp01(l + dl) }));
-            const analog = [-30, -15, 0, 15, 30].map(dh => ({ h: h + dh, s, l }));
-            const split = [0, 150, 210].map(dh => ({ h: h + dh, s, l }));
+            const nearestItem = hVal => {
+                const targetH = hslHex(hVal.h, hVal.s, hVal.l);
+                const idx = nearestColorIndex(targetH);
+                return {
+                    name: COLOR_METAS[idx].name,
+                    pinyin: COLOR_METAS[idx].pinyin,
+                    hex: COLOR_METAS[idx].hex,
+                    rgb: COLOR_METAS[idx].rgb,
+                    cmyk: COLOR_METAS[idx].cmyk,
+                    index: idx
+                };
+            };
+
+            const mono = [0.25, 0.12, 0, -0.12, -0.25].map(dl => nearestItem({ h, s, l: clamp01(l + dl) }));
+            const analog = [-30, -15, 0, 15, 30].map(dh => nearestItem({ h: h + dh, s, l }));
+            const complement = [0, 180].map(dh => nearestItem({ h: h + dh, s, l }));
+            const triad = [0, 120, 240].map(dh => nearestItem({ h: h + dh, s, l }));
+
+            // 传统五行五色关联与拓展方案
+            const split = [0, 150, 210].map(dh => nearestItem({ h: h + dh, s, l }));
+            const fiveColors = [
+                mono[0],
+                split[1],
+                COLOR_METAS[currentIndex >= 0 ? currentIndex : 0],
+                split[2],
+                analog[4]
+            ];
 
             return [
-                { name: '单色配色', items: gen(mono) },
-                { name: '邻近色', items: gen(analog) },
-                { name: '最近互补色', items: nearest([0, 180].map(dh => ({ h: h + dh, s, l }))) },
-                { name: '最相似三角', items: nearest([0, 120, 240].map(dh => ({ h: h + dh, s, l }))) },
-                { name: '五色', items: [
-                    nearestOf(mono[0]),
-                    nearestOf(split[1]),
-                    { name: COLORS[currentIndex][0], hex: hex },
-                    nearestOf(split[2]),
-                    nearestOf(analog[4])
-                ]}
+                { name: '单色搭配 (Monochrome)', items: mono },
+                { name: '邻近雅色 (Analogous)', items: analog },
+                { name: '互补对景 (Complementary)', items: complement },
+                { name: '三角色彩 (Triadic)', items: triad },
+                { name: '五色谱系 (Five-Color)', items: fiveColors }
             ];
         }
 
-        // ---- 状态 ----
+        // ---- 状态管理 ----
         let currentIndex = -1;
+        let currentCategory = 'all';
         window.__currentHex = '';
 
         const els = {
@@ -786,12 +1186,24 @@
             mainName: document.getElementById('mainName'),
             mainPinyin: document.getElementById('mainPinyin'),
             mainHex: document.getElementById('mainHex'),
+            mainRgb: document.getElementById('mainRgb'),
+            mainCmyk: document.getElementById('mainCmyk'),
+            badgeHex: document.getElementById('badgeHex'),
+            badgeRgb: document.getElementById('badgeRgb'),
+            badgeCmyk: document.getElementById('badgeCmyk'),
+            copyHexBtn: document.getElementById('copyHexBtn'),
+            copyRgbBtn: document.getElementById('copyRgbBtn'),
+            copyCmykBtn: document.getElementById('copyCmykBtn'),
+            copyCssBtn: document.getElementById('copyCssBtn'),
+            copyCardBtn: document.getElementById('copyCardBtn'),
             paletteContainer: document.getElementById('paletteContainer'),
             colorGrid: document.getElementById('colorGrid'),
             colorCount: document.getElementById('colorCount'),
             searchInput: document.getElementById('searchInput'),
+            sortSelect: document.getElementById('sortSelect'),
+            catFilterBar: document.getElementById('catFilterBar'),
             randomBtn: document.getElementById('randomBtn'),
-            copyMainBtn: document.getElementById('copyMainBtn'),
+            locateMainBtn: document.getElementById('locateMainBtn'),
             toast: document.getElementById('toast')
         };
 
@@ -800,74 +1212,140 @@
             els.toast.textContent = msg;
             els.toast.classList.add('show');
             clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => els.toast.classList.remove('show'), 1500);
+            toastTimer = setTimeout(() => els.toast.classList.remove('show'), 1600);
         }
 
-        function copyHex(hex) {
-            if (!hex) return;
+        function copyText(text, successMsg) {
+            if (!text) return;
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(hex).then(() => showToast('已复制 ' + hex));
+                navigator.clipboard.writeText(text).then(() => showToast(successMsg || '已复制到剪贴板'));
             } else {
                 const ta = document.createElement('textarea');
-                ta.value = hex;
+                ta.value = text;
                 document.body.appendChild(ta);
                 ta.select();
-                try { document.execCommand('copy'); showToast('已复制 ' + hex); }
-                catch (e) { showToast('复制失败'); }
+                try {
+                    document.execCommand('copy');
+                    showToast(successMsg || '已复制到剪贴板');
+                } catch (e) {
+                    showToast('复制失败');
+                }
                 document.body.removeChild(ta);
             }
         }
 
+        function copyHex(hex) {
+            copyText(hex, '已复制 HEX: ' + hex);
+        }
+
+        function copyRgb(rgb) {
+            const val = rgb.startsWith('rgb') ? rgb : 'rgb(' + rgb + ')';
+            copyText(val, '已复制 RGB: ' + val);
+        }
+
+        function copyCmyk(cmyk) {
+            const parts = cmyk.split(',');
+            const val = parts.length === 4 ? `cmyk(${parts[0]}%, ${parts[1]}%, ${parts[2]}%, ${parts[3]}%)` : cmyk;
+            copyText(val, '已复制 CMYK: ' + val);
+        }
+
+        function copyCss() {
+            if (currentIndex < 0) return;
+            const c = COLOR_METAS[currentIndex];
+            const textC = textFor(c.hex);
+            const css = `/* 中国传统色 · ${c.name} (${c.pinyin}) */
+--color-${c.pinyin}: ${c.hex};
+background-color: ${c.hex};
+color: ${textC};`;
+            copyText(css, '已复制 CSS 代码');
+        }
+
+        function copyFullCard() {
+            if (currentIndex < 0) return;
+            const c = COLOR_METAS[currentIndex];
+            const text = `【中国传统色 · ${c.name}】
+拼音: ${c.pinyin}
+HEX: ${c.hex}
+RGB: rgb(${c.rgb})
+CMYK: ${c.cmyk}`;
+            copyText(text, '已复制完整色卡信息');
+        }
+
+        // 应用主题色及主色信息呈现
         function applyTheme(index) {
+            if (index < 0 || index >= COLOR_METAS.length) return;
             currentIndex = index;
-            const [name, pinyin, hex] = COLORS[index];
-            const text = textFor(hex);
-            const border = mix(hex, text, 0.5);
-            window.__currentHex = hex;
+            const c = COLOR_METAS[index];
+            const text = textFor(c.hex);
+            const border = mix(c.hex, text, 0.5);
+            window.__currentHex = c.hex;
 
             const root = document.documentElement;
-            root.style.setProperty('--bg-color', hex);
+            root.style.setProperty('--bg-color', c.hex);
             root.style.setProperty('--text-color', text);
             root.style.setProperty('--accent-color', text);
             root.style.setProperty('--header-text-color', text);
             root.style.setProperty('--border-color', border);
 
-            // 主色预览
-            els.mainCard.style.background = hex;
+            // 主色预览卡片更新
+            els.mainCard.style.background = c.hex;
             els.mainCard.style.color = text;
-            els.mainName.textContent = name;
-            els.mainPinyin.textContent = pinyin;
-            els.mainHex.textContent = hex;
+            els.mainName.textContent = c.name;
+            els.mainPinyin.textContent = c.pinyin;
+            els.mainHex.textContent = c.hex;
+            els.mainRgb.textContent = c.rgb;
+            els.mainCmyk.textContent = c.cmyk;
 
-            // 配色方案
-            renderPalette(hex);
+            // 配色方案更新
+            renderPalette(c.hex);
 
-            // 高亮当前颜色
+            // 高亮当前颜色格子
             Array.from(els.colorGrid.children).forEach(cell => {
                 cell.classList.toggle('active', parseInt(cell.dataset.index, 10) === index);
             });
         }
 
+        // 渲染配色方案区域
         function renderPalette(hex) {
             const palette = makePalette(hex);
             els.paletteContainer.innerHTML = '';
+
             palette.forEach(group => {
                 const wrap = document.createElement('div');
+
+                const titleRow = document.createElement('div');
+                titleRow.className = 'flex items-center justify-between mb-1.5';
+                
                 const title = document.createElement('div');
-                title.className = 'text-sm font-semibold mb-2';
+                title.className = 'text-xs font-semibold';
                 title.textContent = group.name;
-                wrap.appendChild(title);
+                titleRow.appendChild(title);
+
+                // 一键复制该组色值按钮
+                const copyGroupBtn = document.createElement('button');
+                copyGroupBtn.className = 'text-[11px] opacity-75 hover:opacity-100 underline cursor-pointer';
+                copyGroupBtn.textContent = '复制此组';
+                copyGroupBtn.title = '复制该配色方案全部 HEX 色值';
+                copyGroupBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const hexList = group.items.map(item => item.hex).join(', ');
+                    copyText(hexList, '已复制 ' + group.name + ' 色值列表');
+                });
+                titleRow.appendChild(copyGroupBtn);
+                wrap.appendChild(titleRow);
 
                 const row = document.createElement('div');
                 row.className = 'grid gap-2';
                 row.style.gridTemplateColumns = 'repeat(' + group.items.length + ', minmax(0,1fr))';
+
                 group.items.forEach(item => {
                     const sw = document.createElement('button');
                     sw.className = 'palette-swatch';
                     sw.style.background = item.hex;
                     sw.style.color = textFor(item.hex);
                     sw.style.borderColor = 'var(--border-color)';
-                    sw.title = '点击复制 ' + item.hex;
+                    sw.title = `${item.name ? item.name + ' (' + item.pinyin + ')\n' : ''}HEX: ${item.hex}\nRGB: ${item.rgb || hexToRgb(item.hex).join(',')}\nCMYK: ${item.cmyk || '-'}\n[单击复制 HEX · 双击设为主色]`;
+
                     if (item.name) {
                         const nmEl = document.createElement('span');
                         nmEl.style.fontSize = '0.62rem';
@@ -880,61 +1358,213 @@
                         nmEl.textContent = item.name;
                         sw.appendChild(nmEl);
                     }
+
                     const hxEl = document.createElement('span');
                     hxEl.textContent = item.hex;
                     sw.appendChild(hxEl);
-                    sw.addEventListener('click', () => copyHex(item.hex));
+
+                    // 单击复制色值，双击设为主色
+                    let clickTimeout = null;
+                    sw.addEventListener('click', () => {
+                        if (clickTimeout) clearTimeout(clickTimeout);
+                        clickTimeout = setTimeout(() => {
+                            copyHex(item.hex);
+                        }, 220);
+                    });
+                    sw.addEventListener('dblclick', (e) => {
+                        e.preventDefault();
+                        if (clickTimeout) clearTimeout(clickTimeout);
+                        if (typeof item.index === 'number') {
+                            applyTheme(item.index);
+                            showToast('已切换主色为: ' + item.name);
+                        } else {
+                            const idx = nearestColorIndex(item.hex);
+                            applyTheme(idx);
+                        }
+                    });
+
                     row.appendChild(sw);
                 });
+
                 wrap.appendChild(row);
                 els.paletteContainer.appendChild(wrap);
             });
         }
 
+        // 渲染 751 色库栅格（带分类、搜索、排序优化）
         function renderGrid() {
             els.colorGrid.innerHTML = '';
             const q = els.searchInput.value.trim().toLowerCase();
+            const mode = els.sortSelect.value;
+
+            // 过滤匹配
+            const indices = [];
+            for (let i = 0; i < COLOR_METAS.length; i++) {
+                const m = COLOR_METAS[i];
+                if (currentCategory !== 'all' && m.category !== currentCategory) {
+                    continue;
+                }
+                if (q) {
+                    const matchName = m.name.toLowerCase().includes(q);
+                    const matchPinyin = m.pinyin.toLowerCase().includes(q);
+                    const matchHex = m.hex.toLowerCase().includes(q) || m.hex.toLowerCase().replace('#', '').includes(q);
+                    const matchRgb = m.rgb.includes(q);
+                    const matchCmyk = m.cmyk.includes(q);
+                    if (!matchName && !matchPinyin && !matchHex && !matchRgb && !matchCmyk) continue;
+                }
+                indices.push(i);
+            }
+
+            // 排序模式处理
+            if (mode !== 'default') {
+                indices.sort((a, b) => {
+                    const ma = COLOR_METAS[a];
+                    const mb = COLOR_METAS[b];
+                    if (mode === 'pinyin') {
+                        return ma.pinyin.localeCompare(mb.pinyin, 'zh');
+                    }
+                    if (mode === 'color') {
+                        if (ma.hsl.h !== mb.hsl.h) return ma.hsl.h - mb.hsl.h;
+                        return ma.hsl.l - mb.hsl.l;
+                    }
+                    if (mode === 'brightness-desc') {
+                        return mb.brightness - ma.brightness;
+                    }
+                    if (mode === 'brightness-asc') {
+                        return ma.brightness - mb.brightness;
+                    }
+                    if (mode === 'saturation-desc') {
+                        return mb.hsl.s - ma.hsl.s;
+                    }
+                    if (mode === 'saturation-asc') {
+                        return ma.hsl.s - mb.hsl.s;
+                    }
+                    return 0;
+                });
+            }
+
+            // 使用 DocumentFragment 批量挂载，保证渲染极速流畅
+            const frag = document.createDocumentFragment();
             let shown = 0;
-            COLORS.forEach((c, i) => {
-                const [name, pinyin, hex] = c;
-                if (q && name.toLowerCase().indexOf(q) === -1 && pinyin.toLowerCase().indexOf(q) === -1) return;
+
+            indices.forEach(i => {
                 shown++;
+                const m = COLOR_METAS[i];
                 const cell = document.createElement('button');
                 cell.className = 'color-cell';
                 cell.dataset.index = i;
-                cell.title = name + ' ' + pinyin + ' ' + hex;
+                cell.title = `【${m.name} · ${m.pinyin}】\nHEX: ${m.hex}\nRGB: ${m.rgb}\nCMYK: ${m.cmyk}\n[点击应用为当前主色]`;
 
                 const sw = document.createElement('span');
                 sw.className = 'sw';
-                sw.style.background = hex;
+                sw.style.background = m.hex;
+
                 const nm = document.createElement('span');
                 nm.className = 'nm';
-                nm.textContent = name;
+                nm.textContent = m.name;
 
                 cell.appendChild(sw);
                 cell.appendChild(nm);
                 cell.addEventListener('click', () => applyTheme(i));
-                els.colorGrid.appendChild(cell);
+
+                if (i === currentIndex) {
+                    cell.classList.add('active');
+                }
+
+                frag.appendChild(cell);
             });
-            els.colorCount.textContent = shown + ' / ' + COLORS.length + ' 色';
-            if (currentIndex >= 0) {
-                Array.from(els.colorGrid.children).forEach(cell => {
-                    cell.classList.toggle('active', parseInt(cell.dataset.index, 10) === currentIndex);
-                });
-            }
+
+            els.colorGrid.appendChild(frag);
+            els.colorCount.textContent = shown === COLOR_METAS.length ? `共 ${shown} 色` : `${shown} / ${COLOR_METAS.length} 色`;
         }
 
-        // ---- 事件 ----
-        els.randomBtn.addEventListener('click', () => {
-            applyTheme(Math.floor(Math.random() * COLORS.length));
-            showToast('已随机配色');
-        });
-        els.copyMainBtn.addEventListener('click', () => copyHex(window.__currentHex));
-        els.searchInput.addEventListener('input', renderGrid);
+        // 定位并滚动至当前选中的主色
+        function locateMainColor() {
+            if (currentIndex < 0) return;
+            // 如果被筛选或搜索隐藏了，先重置筛选以便看到它
+            const curMeta = COLOR_METAS[currentIndex];
+            let needReRender = false;
+            if (currentCategory !== 'all' && curMeta.category !== currentCategory) {
+                currentCategory = 'all';
+                Array.from(els.catFilterBar.children).forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.cat === 'all');
+                });
+                needReRender = true;
+            }
+            if (els.searchInput.value.trim()) {
+                els.searchInput.value = '';
+                needReRender = true;
+            }
+            if (needReRender) {
+                renderGrid();
+            }
 
-        // ---- 初始化：随机主色调 ----
+            setTimeout(() => {
+                const cell = els.colorGrid.querySelector(`[data-index="${currentIndex}"]`);
+                if (cell) {
+                    cell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    cell.classList.add('active');
+                    showToast('已定位到: ' + curMeta.name);
+                }
+            }, 50);
+        }
+
+        // ---- 事件绑定 ----
+        els.randomBtn.addEventListener('click', () => {
+            // 若当前有筛选，优先在已筛选结果中随机挑选
+            const cells = els.colorGrid.children;
+            if (cells.length > 0) {
+                const randCell = cells[Math.floor(Math.random() * cells.length)];
+                const idx = parseInt(randCell.dataset.index, 10);
+                applyTheme(idx);
+                showToast('已随机挑选: ' + COLOR_METAS[idx].name);
+            } else {
+                const randIdx = Math.floor(Math.random() * COLOR_METAS.length);
+                applyTheme(randIdx);
+                showToast('已随机挑选: ' + COLOR_METAS[randIdx].name);
+            }
+        });
+
+        els.locateMainBtn.addEventListener('click', locateMainColor);
+
+        // 主色值卡片点击一键复制
+        els.badgeHex.addEventListener('click', () => copyHex(window.__currentHex));
+        els.badgeRgb.addEventListener('click', () => {
+            if (currentIndex >= 0) copyRgb(COLOR_METAS[currentIndex].rgb);
+        });
+        els.badgeCmyk.addEventListener('click', () => {
+            if (currentIndex >= 0) copyCmyk(COLOR_METAS[currentIndex].cmyk);
+        });
+
+        // 按钮点击复制
+        els.copyHexBtn.addEventListener('click', () => copyHex(window.__currentHex));
+        els.copyRgbBtn.addEventListener('click', () => {
+            if (currentIndex >= 0) copyRgb(COLOR_METAS[currentIndex].rgb);
+        });
+        els.copyCmykBtn.addEventListener('click', () => {
+            if (currentIndex >= 0) copyCmyk(COLOR_METAS[currentIndex].cmyk);
+        });
+        els.copyCssBtn.addEventListener('click', copyCss);
+        els.copyCardBtn.addEventListener('click', copyFullCard);
+
+        // 搜索与排序
+        els.searchInput.addEventListener('input', renderGrid);
+        els.sortSelect.addEventListener('change', renderGrid);
+
+        // 色系分类按钮点击
+        els.catFilterBar.addEventListener('click', (e) => {
+            const btn = e.target.closest('.cat-btn');
+            if (!btn) return;
+            Array.from(els.catFilterBar.children).forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentCategory = btn.dataset.cat;
+            renderGrid();
+        });
+
+        // ---- 初始化 ----
         renderGrid();
-        applyTheme(Math.floor(Math.random() * COLORS.length));
+        // 随机一个默认主色
+        applyTheme(Math.floor(Math.random() * COLOR_METAS.length));
     </script>
     <script src="../script.js"></script>
 </body>
